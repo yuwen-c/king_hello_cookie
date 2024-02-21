@@ -48,7 +48,7 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
   };
   try{
     loggerFire.log('info', { 交易平台交易序號: transaction_unique_id});
-    const response = await axios.post(createOrderUrl, requestData, { headers, timeout: 5000 })
+    const response = await axios.post(createOrderUrl, requestData, { headers, timeout: 10000 })
     console.log("response.data:", response.data.id); // 存id到db
     return response.data.id;
   }
@@ -60,14 +60,14 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
       錯誤訊息: error, 
       // keys: error.response?.data ? Object.keys(error.response.data) : [] 
     });
-    await new Promise(resolve => setTimeout(resolve, 2*60*1000)); // 如果有失敗就睡2min 
+    await new Promise(resolve => setTimeout(resolve, 1*60*1000)); // 如果有失敗就睡2min 
   }
   finally {
     // if(lastTwoChars = transaction_unique_id.substring(transaction_unique_id.length - 2) === '00') {
     //   await new Promise(resolve => setTimeout(resolve, 5*60*1000)); 
     // }
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 改600看看，因為後面還有寫入shopline id的task，有時會失敗，改800。改回1000。還是會有internal error，改1200。改1400。改3000。
-    console.log('sleep 2s');
+    console.log('sleep 1.5s');
+    await new Promise(resolve => setTimeout(resolve, 1500)); // 改600看看，因為後面還有寫入shopline id的task，有時會失敗，改800。改回1000。還是會有internal error，改1200。改1400。改3000。改1500。
   }
 }
 

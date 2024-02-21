@@ -2,11 +2,17 @@ const { format, createLogger, transports } = require('winston');
 const path = require('path');
 
 const logFilePath = path.join(process.cwd(), 'log', 'logfile-fire-timestamp.log');
+
+// 使用 'Asia/Taipei' 时区
+const myCustomTimezone = () => {
+  return new Date().toLocaleString("en-US", {timeZone: "Asia/Taipei"});
+};
+
 const loggerFire = createLogger({
   level: 'info',
   format: format.combine(
     format.timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss' // 添加時間戳，會轉換成目前的時區
+      format: myCustomTimezone 
     }),
     format.json()
   ),

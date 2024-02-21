@@ -59,20 +59,11 @@ const testCreateOrder = async (order) => {
 // testCreateOrder(orderExample);
 // getOrderTransactionId('10002904'); // 建立訂單，使用交易序號，後來發現不是唯一值
 
-// 1. 建立訂單到shopline
+// 1. 建立訂單到shopline (後來改用下面的createOrders)
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
-// start(含), end「交易平台交易序號」: 
-// 'USHOP10002724', 'USHOP10002726'
-// 'USHOP10002726', 'USHOP10002730'
-// 'USHOP10002730', 'USHOP10002740'
-// 'USHOP10002740', 'USHOP10002742'
-// USHOP10002742, USHOP10002762 ok
 
 // 2. 變更訂單狀態
-// batchUpdateOrderStatus('USHOP10002742', 'USHOP10002762')
-// start(含), end「交易平台交易序號」: 
-// 'USHOP10002724', 'USHOP10002740'
-// 'USHOP10002740', 'USHOP10002742'
+batchUpdateOrderStatus('USHOP10002742', 'USHOP10002762') // start(含), end「交易平台交易序號」: 
 
 // 3. 變更付款狀態
 // batchUpdatePaymentStatus('USHOP10002742', 'USHOP10002762')
@@ -84,9 +75,18 @@ const testCreateOrder = async (order) => {
 // exportToExcel(); 
 
 const createOrders = async (transaction_start, transaction_end) => {
-  logger.log('info', { message: '開始創訂單與改狀態', transaction_start, transaction_end });
+  logger.log('info', { message: '開始創訂單', transaction_start, transaction_end });
   await ordersETL(transaction_start, transaction_end);
   logger.log('info', { message: '創訂單結束', transaction_start, transaction_end });
 }
 
-createOrders('USHOP10020927', 'USHOP10034778') 
+// createOrders('自訂交易10033881', '自訂交易10033882')
+
+// 是否要組合？或是分開處理？：batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus
+// const updateOrders = async (transaction_start, transaction_end) => {
+//   logger.log('info', { message: '開始更新訂單', transaction_start, transaction_end });
+//   await batchUpdateOrderStatus(transaction_start, transaction_end);
+//   await batchUpdatePaymentStatus(transaction_start, transaction_end);
+//   await batchUpdateDeliveryStatus(transaction_start, transaction_end);
+//   logger.log('info', { message: '更新訂單結束', transaction_start, transaction_end });
+// } 

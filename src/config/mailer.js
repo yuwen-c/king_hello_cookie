@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 
+const environment = process.env.environment;
+
 const sendMail = (transaction_start ,transaction_end) => {
     // 創建一個可重用的 transporter 對象使用預設 SMTP 服務
     let transporter = nodemailer.createTransport({
@@ -14,7 +16,7 @@ const sendMail = (transaction_start ,transaction_end) => {
     let mailOptions = {
         from: process.env.email,
         to: process.env.email,
-        subject: '腳本執行完畢通知',
+        subject: `${environment} 腳本執行完畢通知`,
         text: `你的腳本已經執行完畢。交易序號範圍: ${transaction_start} - ${transaction_end}`
     };
 

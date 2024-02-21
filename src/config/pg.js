@@ -8,7 +8,17 @@ const config = {
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DATABASE
 }
-console.log("config: ", config);
+// console.log("config: ", config);
+
+const config_vm = {
+  host: process.env.PG_HOST_VM,
+  port: process.env.PG_PORT_VM,
+  user: process.env.PG_USER_VM,
+  password: process.env.PG_PASSWORD_VM,
+  database: process.env.PG_DATABASE_VM
+}
+
+console.log("config_vm: ", config_vm);
 
 // const client = new Client(config);
 // client.connect();
@@ -22,7 +32,8 @@ console.log("config: ", config);
 // });
       
 // 改用pool連線
-const pool = new Pool(config);
+// const pool = new Pool(config);
+const pool = new Pool(config_vm);
 
 // 測試pool連線
 // pool.connect((err, client, release) => {

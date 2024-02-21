@@ -27,8 +27,14 @@ const updateOrderStatus = async (transaction_unique_id) => {
       const { shopline_id, '訂單狀態': order_status } = orderRows[0];
       console.log('訂單id和狀態:', shopline_id, order_status, orderStatusMap[order_status]);
       if(!orderStatusMap[order_status]) {
-        logger.log('error', { message: 'update order status error', error: 'order_status 不存在'});
+        logger.log('error', { message: '更新訂單狀態失敗', 錯誤訊息: 'order_status 不存在', 交易平台交易序號: transaction_unique_id});
         console.log('order_status 不存在:', transaction_unique_id);
+        return;
+      }
+      // 檢查是否存在shopline_id，如果不存在，不執行
+      if(!shopline_id) {
+        logger.log('error', { message: '更新訂單狀態失敗', 錯誤訊息: 'shopline_id 不存在', 交易平台交易序號: transaction_unique_id});
+        console.log('shopline_id 不存在:', transaction_unique_id);
         return;
       }
       const response = await axios.patch(`https://open.shopline.io/v1/orders/${shopline_id}/status`, {
@@ -37,13 +43,14 @@ const updateOrderStatus = async (transaction_unique_id) => {
         headers: {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000 // 原本用10000，全部打失敗？增加後又改回來，又可以？？？
       });
       console.log("update order status success"); 
     }
   }
   catch(error) {
-    logger.log('error', { message: 'update order status error', error});
+    logger.log('error', { message: '更新訂單狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
     console.log("error:", error);
   }
 }
@@ -56,7 +63,7 @@ const batchUpdateOrderStatus = async (transaction_start, transaction_end) => {
       console.log('row[0].交易平台交易序號:', row[0].交易平台交易序號);
       const transaction_unique_id = row[0].交易平台交易序號;
       await updateOrderStatus(transaction_unique_id);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 原本設200，不確定可否，先改1000
       row = await cursor.read(1);
     }
     cursor.close(() => {
@@ -81,6 +88,13 @@ const updatePaymentStatus = async (transaction_unique_id) => {
     const orderRows = await getOrderData(transaction_unique_id);
     if(orderRows.length > 0) {
       const { shopline_id, '付款日期': payment_date, '訂單狀態': order_status } = orderRows[0];
+      // 檢查是否存在shopline_id，如果不存在，不執行
+      if(!shopline_id) {
+        logger.log('error', { message: '更新付款狀態失敗', 錯誤訊息: 'shopline_id 不存在', 交易平台交易序號: transaction_unique_id});
+        console.log('shopline_id 不存在:', transaction_unique_id);
+        return;
+      }
+
       let payment_status = '';
       if(payment_date && payment_date !== '') {
         if(order_status === '已取消') {
@@ -105,14 +119,15 @@ const updatePaymentStatus = async (transaction_unique_id) => {
         headers: {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000
       });
       console.log("response.data:", response.data); 
     }
   }
   catch(error) {
-    logger.log('error', { message: 'update payment status error', error});
-    console.log("error:", error.response.data);
+    logger.log('error', { message: '更新付款狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    console.log("error:", error);
   }
 }
 
@@ -124,7 +139,7 @@ const batchUpdatePaymentStatus = async (transaction_start, transaction_end) => {
       console.log('row[0].交易平台交易序號:', row[0].交易平台交易序號);
       const transaction_unique_id = row[0].交易平台交易序號;
       await updatePaymentStatus(transaction_unique_id);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       row = await cursor.read(1);
     }
     cursor.close(() => {
@@ -148,6 +163,13 @@ const orderStatusMapDeliveryStatus = {
 const updateDeliveryStatus = async (transaction_unique_id) => {
   try{
     const orderRows = await getOrderData(transaction_unique_id);
+    const { shopline_id } = orderRows[0];
+      // 檢查是否存在shopline_id，如果不存在，不執行
+    if(!shopline_id) {
+      logger.log('error', { message: '更新物流狀態失敗', 錯誤訊息: 'shopline_id 不存在', 交易平台交易序號: transaction_unique_id});
+      console.log('shopline_id 不存在:', transaction_unique_id);
+      return;
+    }
     if(orderRows.length > 0) {
       const { shopline_id, '出貨日期': delivery_date, '訂單狀態': order_status } = orderRows[0];
       let delivery_status = '';
@@ -163,7 +185,7 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
         delivery_status = orderStatusMapDeliveryStatus[order_status];
       }
       else {
-        logger.log('error', { message: 'update delivery status error', error: 'delivery status 不存在'});
+        logger.log('error', { message: '更新物流狀態失敗', 錯誤訊息: 'delivery status 不存在', 交易平台交易序號: transaction_unique_id});
         console.log('delivery status 不存在:', transaction_unique_id );
         return;
       }
@@ -174,14 +196,15 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
         headers: {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000
       });
       console.log("response.data:", response.data); 
     }
   }
   catch(error) {
-    logger.log('error', { message: 'update delivery status error', error});
-    console.log("error:", error.response.data);
+    logger.log('error', { message: '更新物流狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    console.log("error:", error);
   }
 }
 
@@ -193,7 +216,7 @@ const batchUpdateDeliveryStatus = async (transaction_start, transaction_end) => 
       console.log('row[0].交易平台交易序號:', row[0].交易平台交易序號);
       const transaction_unique_id = row[0].交易平台交易序號;
       await updateDeliveryStatus(transaction_unique_id);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       row = await cursor.read(1);
     }
     cursor.close(() => {
@@ -206,10 +229,10 @@ const batchUpdateDeliveryStatus = async (transaction_start, transaction_end) => 
 }
 
 module.exports = {
-  updateOrderStatus,
+  // updateOrderStatus,
   batchUpdateOrderStatus,
-  updatePaymentStatus,
+  // updatePaymentStatus,
   batchUpdatePaymentStatus,
-  updateDeliveryStatus,
+  // updateDeliveryStatus,
   batchUpdateDeliveryStatus
 }

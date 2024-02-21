@@ -63,24 +63,24 @@ const testCreateOrder = async (order) => {
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
 // 2. 變更訂單狀態
-batchUpdateOrderStatus('USHOP10002742', 'USHOP10002762') // start(含), end「交易平台交易序號」: 
+batchUpdateOrderStatus('自訂交易10002465', '自訂交易10002470') // start(含), end「交易平台交易序號」: 
 
 // 3. 變更付款狀態
-// batchUpdatePaymentStatus('USHOP10002742', 'USHOP10002762')
+// batchUpdatePaymentStatus('自訂交易10002452', '自訂交易10002460')
 
 // 4. 變更出貨狀態
-// batchUpdateDeliveryStatus('USHOP10002742', 'USHOP10002762')
+// batchUpdateDeliveryStatus('自訂交易10002452', '自訂交易10002460')
 
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定
 // exportToExcel(); 
 
+// 1. 創建訂單+log
 const createOrders = async (transaction_start, transaction_end) => {
   logger.log('info', { message: '開始創訂單', transaction_start, transaction_end });
   await ordersETL(transaction_start, transaction_end);
   logger.log('info', { message: '創訂單結束', transaction_start, transaction_end });
 }
-
-// createOrders('自訂交易10033881', '自訂交易10033882')
+// createOrders('自訂交易10033881', '自訂交易10033882') // 第一階段已全部打完
 
 // 是否要組合？或是分開處理？：batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus
 // const updateOrders = async (transaction_start, transaction_end) => {

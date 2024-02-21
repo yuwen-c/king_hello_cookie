@@ -44,7 +44,7 @@ const updateOrderStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 10000 // 原本用10000，全部打失敗？增加後又改回來，又可以？？？
+        timeout: 100000 // 原本用10000，全部打失敗？好像時好時壞
       });
       console.log("update order status success"); 
     }
@@ -56,6 +56,7 @@ const updateOrderStatus = async (transaction_unique_id) => {
 }
 
 const batchUpdateOrderStatus = async (transaction_start, transaction_end) => {
+  logger.log('info', { message: '===開始修改訂單狀態===', transaction_start, transaction_end });
   try {
     const { client, cursor } = await getCursor(transaction_start, transaction_end);
     let row = await cursor.read(1);
@@ -73,6 +74,7 @@ const batchUpdateOrderStatus = async (transaction_start, transaction_end) => {
   } catch (error) {
     console.log(error);
   }
+  logger.log('info', { message: '===修改訂單狀態結束===', transaction_start, transaction_end });
 }
 
 // 更新付款狀態：PATCH https://open.shopline.io/v1/orders/:id/order_payment_status
@@ -120,7 +122,7 @@ const updatePaymentStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 10000
+        timeout: 100000
       });
       console.log("response.data:", response.data); 
     }
@@ -132,6 +134,7 @@ const updatePaymentStatus = async (transaction_unique_id) => {
 }
 
 const batchUpdatePaymentStatus = async (transaction_start, transaction_end) => {
+  logger.log('info', { message: '===開始修改付款狀態===', transaction_start, transaction_end });
   try {
     const { client, cursor } = await getCursor(transaction_start, transaction_end);
     let row = await cursor.read(1);
@@ -149,6 +152,7 @@ const batchUpdatePaymentStatus = async (transaction_start, transaction_end) => {
   } catch (error) {
     console.log(error);
   }
+  logger.log('info', { message: '===修改付款狀態結束===', transaction_start, transaction_end });
 }
 
 // 更新物流狀態：PATCH https://open.shopline.io/v1/orders/:id/order_delivery_status
@@ -197,7 +201,7 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 10000
+        timeout: 100000
       });
       console.log("response.data:", response.data); 
     }
@@ -209,6 +213,7 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
 }
 
 const batchUpdateDeliveryStatus = async (transaction_start, transaction_end) => {
+  logger.log('info', { message: '===開始修改物流狀態===', transaction_start, transaction_end });
   try {
     const { client, cursor } = await getCursor(transaction_start, transaction_end);
     let row = await cursor.read(1);
@@ -226,6 +231,7 @@ const batchUpdateDeliveryStatus = async (transaction_start, transaction_end) => 
   } catch (error) {
     console.log(error);
   }
+  logger.log('info', { message: '===修改物流狀態結束===', transaction_start, transaction_end });
 }
 
 module.exports = {

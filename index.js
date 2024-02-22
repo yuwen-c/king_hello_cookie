@@ -90,4 +90,4 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // createOrders('自訂交易10034268', '自訂交易10034268', 2)
 
 // 5. 處理錯誤訂單
-// handleErrorOrders();
+handleErrorOrders(1) // phase=1 or 2;

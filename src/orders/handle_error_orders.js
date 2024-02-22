@@ -2,12 +2,14 @@ const axios = require('axios');
 const fs = require('fs');
 const { pool } = require('../config/pg');
 const loggerErrorOrders = require('../config/logErrorOrders');
+const { ORDER_TABLE_MAPPING } = require('./utils');
 
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
 
-const getErrorOrders = async (client) => {
+const getErrorOrders = async (client, phase) => {
   console.log('getErrorOrders'); // ok
-  const query = `select distinct(交易平台交易序號) from orders_malbic om 
+  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+  const query = `select distinct(交易平台交易序號) from ${table} om 
   where shopline_id is null and 交易平台 = 'USHOP'
   order by 交易平台交易序號 ASC;`;
   try {
@@ -60,10 +62,11 @@ const searchOrders = async (order_id) => {
   }
 }
 
-const writeOrderShoplineId = async (client, transaction_unique_id, shopline_id) => {
+const writeOrderShoplineId = async (client, transaction_unique_id, shopline_id, phase) => {
   console.log('transaction_unique_id:', transaction_unique_id, 'shopline_id:', shopline_id);
+  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
   try {
-    const result = await client.query("UPDATE orders_malbic SET shopline_id = $1 WHERE 交易平台交易序號 = $2", [shopline_id, transaction_unique_id]);
+    const result = await client.query(`UPDATE ${table} SET shopline_id = $1 WHERE 交易平台交易序號 = $2`, [shopline_id, transaction_unique_id]);
     console.log(`${transaction_unique_id} write shopline id success`);
   } catch (error) {
     console.log(error);
@@ -75,18 +78,22 @@ const writeOrderShoplineId = async (client, transaction_unique_id, shopline_id) 
 // 2. 透過shopline api查詢shopline_id
 // 3. 存shopline_id到db
 // 4. 如果沒有，再手動處理。需要寫到logger
-const handleErrorOrders = async () => {
+const handleErrorOrders = async (phase) => {
+  if(!phase){
+    console.log('需要指定第一階段或第二階段');
+    return;
+  }
   loggerErrorOrders.log('info', { message: '=== 開始處理錯誤訂單==='});
   const client = await pool.connect();
   try {
-    const errorOrders = await getErrorOrders(client);
+    const errorOrders = await getErrorOrders(client, phase);
     // console.log('errorOrders', errorOrders); // ok
     // const getSampleOrders = errorOrders.slice(0, 8);
     for(let i = 0; i < errorOrders.length; i++) {
       const shopline_id = await searchOrders(errorOrders[i]['交易平台交易序號']);
       await new Promise(resolve => setTimeout(resolve, 1000));
       if(shopline_id) {
-        await writeOrderShoplineId(client, errorOrders[i]['交易平台交易序號'], shopline_id);
+        await writeOrderShoplineId(client, errorOrders[i]['交易平台交易序號'], shopline_id, phase);
       }
     }
   }

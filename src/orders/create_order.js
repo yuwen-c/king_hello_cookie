@@ -73,7 +73,7 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
 
 // 修改辨識訂單的唯一值，從交易序號改為「交易平台交易序號」(存在orders_id_platform)
 // 已另外將distinct的交易序號存到orders_transaction_id table(直接在DBeaver操作)
-const ordersETL = async (transaction_start, transaction_end) => {
+const ordersETL = async (transaction_start, transaction_end, client) => {
   try {
     const { client, cursor } = await getCursor(transaction_start, transaction_end)
     let rows = await cursor.read(1);

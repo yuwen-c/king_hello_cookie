@@ -3,14 +3,16 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
-const client = require('./src/config/pg');
-const { getOrderTransactionId, ordersETL} = require('./src/orders/create_order')
+// const client = require('./src/config/pg');
+const { pool } = require('../config/pg');
+const { ordersETL} = require('./src/orders/create_order')
 const getOrderData = require('./src/orders/get_order_data')
 const orderExample = require('./src/orders/order_example');
 const logger = require('./src/config/log');
 const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus} = require('./src/orders/update_order');
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
+const handleErrorOrders = require('./src/orders/handle_error_orders');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_USER_AGENT = process.env.SHOPLINE_USER_AGENT;
@@ -63,7 +65,7 @@ const testCreateOrder = async (order) => {
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
 // 2. 變更訂單狀態
-batchUpdateOrderStatus('自訂交易10002470', '自訂交易10002475') // start(含), end「交易平台交易序號」: 
+// batchUpdateOrderStatus('自訂交易10002470', '自訂交易10002475') // start(含), end「交易平台交易序號」: 
 
 // 3. 變更付款狀態
 // batchUpdatePaymentStatus('自訂交易10002452', '自訂交易10002460')
@@ -77,16 +79,13 @@ batchUpdateOrderStatus('自訂交易10002470', '自訂交易10002475') // start(
 // 1. 創建訂單+log
 const createOrders = async (transaction_start, transaction_end) => {
   logger.log('info', { message: '開始創訂單', transaction_start, transaction_end });
+  // const client = await pool.connect();
   await ordersETL(transaction_start, transaction_end);
+  // client.release();
   logger.log('info', { message: '創訂單結束', transaction_start, transaction_end });
 }
-// createOrders('自訂交易10033881', '自訂交易10033882') // 第一階段已全部打完
+// createOrders('USHOP10004577', 'USHOP10004578') // 第一階段已全部打完
 
-// 是否要組合？或是分開處理？：batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus
-// const updateOrders = async (transaction_start, transaction_end) => {
-//   logger.log('info', { message: '開始更新訂單', transaction_start, transaction_end });
-//   await batchUpdateOrderStatus(transaction_start, transaction_end);
-//   await batchUpdatePaymentStatus(transaction_start, transaction_end);
-//   await batchUpdateDeliveryStatus(transaction_start, transaction_end);
-//   logger.log('info', { message: '更新訂單結束', transaction_start, transaction_end });
-// } 
+
+// 5. 處理錯誤訂單
+handleErrorOrders();

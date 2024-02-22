@@ -44,7 +44,7 @@ const updateOrderStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 100000 // 原本用10000，全部打失敗？好像時好時壞
+        // timeout: 100000 // 原本用10000，全部打失敗？好像時好時壞
       });
       console.log("update order status success"); 
     }
@@ -122,7 +122,7 @@ const updatePaymentStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 100000
+        // timeout: 100000
       });
       console.log("response.data:", response.data); 
     }
@@ -201,7 +201,7 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
           'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
           'Content-Type': 'application/json'
         },
-        timeout: 100000
+        // timeout: 100000
       });
       console.log("response.data:", response.data); 
     }

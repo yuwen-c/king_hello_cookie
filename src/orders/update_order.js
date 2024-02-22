@@ -73,7 +73,7 @@ const batchUpdateOrderStatus = async (transaction_start, transaction_end, phase)
       console.log('row[0].交易平台交易序號:', row[0].交易平台交易序號);
       const transaction_unique_id = row[0].交易平台交易序號;
       await updateOrderStatus(transaction_unique_id, phase, client2);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 原本設200，不確定可否，先改1000
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 原本設200，不確定可否，先改1000
       row = await cursor.read(1);
     }
     cursor.close(() => {

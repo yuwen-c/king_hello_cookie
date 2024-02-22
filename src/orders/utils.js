@@ -1,6 +1,20 @@
 const { log } = require("winston");
 const logger = require('../config/log');
 
+// 我有第一階段訂單，會使用orders_id_platform table和orders_malbic table
+// 還有第二階段訂單，會使用orders_id_platform_2 table和orders_malbic_2 table
+// 請幫我做一個mapping用的object:
+const ORDER_TABLE_MAPPING = {
+  FIRST_PHASE: {
+    ID_PLATFORM: 'orders_id_platform',
+    ORDERS: 'orders_malbic'
+  },
+  SECOND_PHASE: {
+    ID_PLATFORM: 'orders_id_platform_2',
+    ORDERS: 'orders_malbic_2'
+  }
+}
+
 const getRemark = (orderRow) => {
   const { '店家備註': shop_remark, '取消原因': cancel_reason, 
   '買家備註': customer_remark, '建立時間': build_time, 
@@ -234,5 +248,6 @@ module.exports = {
   getBonus,
   checkPoint,
   checkIfSubtotalIsFloat,
-  removeDuplicates
+  removeDuplicates,
+  ORDER_TABLE_MAPPING
 }

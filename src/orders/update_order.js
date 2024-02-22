@@ -1,7 +1,7 @@
 const axios = require('axios');
 const logger = require('../config/log');
 const getOrderData = require('./get_order_data')
-const getCursor = require('./get_cursor')
+const { getCursor } = require('./get_cursor')
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;

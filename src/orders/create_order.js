@@ -9,32 +9,34 @@ const Cursor = require('pg-cursor')
 const modifyOrder = require('./modify_order')
 const getOrderData = require('./get_order_data')
 const logger = require('../config/log');
-const getCursor = require('./get_cursor');
+const { getCursorWOConnect } = require('./get_cursor');
 const { cli } = require('winston/lib/winston/config');
 // const beep = require('beepbeep');
 const sendMail = require('../config/mailer');
 const loggerFire = require('../config/logFireTimestamp');
+const { ORDER_TABLE_MAPPING } = require('./utils');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
 
-const writeOrderShoplineId = async (transaction_unique_id, shopline_id) => {
-  const client = await pool.connect();
+const writeOrderShoplineId = async (transaction_unique_id, shopline_id, client, phase) => {
+  // const client = await pool.connect();
   if(!shopline_id) {
     // logger.log('error', { message: '寫入shopline id error', error: 'shopline_id不存在', transaction_unique_id});
-    client.release();
+    // client.release();
     return;
   }
   try {
-    const result = await client.query("UPDATE orders_malbic SET shopline_id = $1 WHERE 交易平台交易序號 = $2", [shopline_id, transaction_unique_id]);
+    const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+    const result = await client.query(`UPDATE ${table} SET shopline_id = $1 WHERE 交易平台交易序號 = $2`, [shopline_id, transaction_unique_id]);
     console.log('write shopline id success');
   } catch (error) {
     console.log(error);
     logger.log('error', { message: '寫入shopline id error', error});
   }
-  finally {
-    client.release();
-  }
+  // finally {
+  //   client.release();
+  // }
 }
 
 // 打shopline create order api
@@ -73,21 +75,23 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
 
 // 修改辨識訂單的唯一值，從交易序號改為「交易平台交易序號」(存在orders_id_platform)
 // 已另外將distinct的交易序號存到orders_transaction_id table(直接在DBeaver操作)
-const ordersETL = async (transaction_start, transaction_end, client) => {
+const ordersETL = async (transaction_start, transaction_end, phase) => {
+  const client = await pool.connect();
   try {
-    const { client, cursor } = await getCursor(transaction_start, transaction_end)
+    const cursor = await getCursorWOConnect(transaction_start, transaction_end, client, phase);
     let rows = await cursor.read(1);
-
+    console.log('rows.length', rows.length); // ok
+    const client2 = await pool.connect();
     while (rows.length) {
       console.log('rows[0].交易平台交易序號:', rows[0].交易平台交易序號);
       const transaction_unique_id = rows[0].交易平台交易序號;
-      const orderData =  await getOrderData(transaction_unique_id)
+      const orderData =  await getOrderData(transaction_unique_id, phase, client2);
       console.log('orderData[0].shopline_id:', orderData[0].shopline_id);
       // 確定如果訂單還沒有寫到shopline，才會繼續執行
       if(orderData[0].shopline_id === null || orderData[0].shopline_id === '') {
         const order = modifyOrder(orderData);
         const shoplineId = await createOrderByAPI(order, transaction_unique_id);
-        await writeOrderShoplineId(transaction_unique_id, shoplineId);
+        await writeOrderShoplineId(transaction_unique_id, shoplineId, client2, phase);
       }
       else{
         console.log(`${transaction_unique_id}已有shopline_id，不執行後續動作`);
@@ -97,13 +101,14 @@ const ordersETL = async (transaction_start, transaction_end, client) => {
     }
     // 關閉cursor
     cursor.close(() => {
+      client2.release();
       console.log('cursor.close');
-      client.release()
     })
   } catch (error) {
     console.log(error);
   }
   finally {
+    client.release()
     process.stdout.write('\u0007');
     sendMail(transaction_start, transaction_end);
   }

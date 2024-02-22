@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
 // const client = require('./src/config/pg');
-const { pool } = require('../config/pg');
+const { pool } = require('./src/config/pg');
 const { ordersETL} = require('./src/orders/create_order')
 const getOrderData = require('./src/orders/get_order_data')
 const orderExample = require('./src/orders/order_example');
@@ -77,15 +77,17 @@ const testCreateOrder = async (order) => {
 // exportToExcel(); 
 
 // 1. 創建訂單+log
-const createOrders = async (transaction_start, transaction_end) => {
-  logger.log('info', { message: '開始創訂單', transaction_start, transaction_end });
-  // const client = await pool.connect();
-  await ordersETL(transaction_start, transaction_end);
-  // client.release();
-  logger.log('info', { message: '創訂單結束', transaction_start, transaction_end });
+const createOrders = async (transaction_start, transaction_end, phase) => {
+  if(!phase) {
+    console.log('需要指定第一階段或第二階段');
+    return;
+  }
+  logger.log('info', { message: '===開始創訂單===', transaction_start, transaction_end });
+  await ordersETL(transaction_start, transaction_end, phase);
+  logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
-// createOrders('USHOP10004577', 'USHOP10004578') // 第一階段已全部打完
-
+// 第一階段已全部打完，目前要創第二階段訂單，帶入phase=2
+// createOrders('自訂交易10034268', '自訂交易10034268', 2)
 
 // 5. 處理錯誤訂單
-handleErrorOrders();
+// handleErrorOrders();

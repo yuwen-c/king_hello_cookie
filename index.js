@@ -65,7 +65,7 @@ const testCreateOrder = async (order) => {
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
 // 2. 變更訂單狀態
-// batchUpdateOrderStatus('自訂交易10002470', '自訂交易10002475') // start(含), end「交易平台交易序號」: 
+// batchUpdateOrderStatus('USHOP10002724', 'USHOP10002730', 1) // start(含), end「交易平台交易序號」: 
 
 // 3. 變更付款狀態
 // batchUpdatePaymentStatus('自訂交易10002452', '自訂交易10002460')
@@ -90,4 +90,4 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // createOrders('自訂交易10034268', '自訂交易10034268', 2)
 
 // 5. 處理錯誤訂單
-handleErrorOrders(1) // phase=1 or 2;
+// handleErrorOrders(1) // phase=1 or 2;

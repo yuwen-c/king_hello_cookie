@@ -1,7 +1,8 @@
 const axios = require('axios');
 const logger = require('../config/log');
 const getOrderData = require('./get_order_data')
-const { getCursor } = require('./get_cursor')
+const { getCursor, getCursorWOConnect } = require('./get_cursor')
+const { pool } = require('../config/pg');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
@@ -20,9 +21,9 @@ const orderStatusMap = {
   '新訂單': 'pending'
 }
 
-const updateOrderStatus = async (transaction_unique_id) => {
+const updateOrderStatus = async (transaction_unique_id, phase, client) => {
   try{
-    const orderRows = await getOrderData(transaction_unique_id);
+    const orderRows = await getOrderData(transaction_unique_id, phase, client);
     if(orderRows.length > 0) {
       const { shopline_id, '訂單狀態': order_status } = orderRows[0];
       console.log('訂單id和狀態:', shopline_id, order_status, orderStatusMap[order_status]);
@@ -55,24 +56,35 @@ const updateOrderStatus = async (transaction_unique_id) => {
   }
 }
 
-const batchUpdateOrderStatus = async (transaction_start, transaction_end) => {
+const batchUpdateOrderStatus = async (transaction_start, transaction_end, phase) => {
+  if(!phase) {
+    console.log('需要指定第一階段或第二階段');
+    return;
+  }
   logger.log('info', { message: '===開始修改訂單狀態===', transaction_start, transaction_end });
+  const client = await pool.connect();
   try {
-    const { client, cursor } = await getCursor(transaction_start, transaction_end);
+    const client2 = await pool.connect();
+    // const { client, cursor } = await getCursor(transaction_start, transaction_end);
+    const cursor = await getCursorWOConnect(transaction_start, transaction_end, client, phase);
     let row = await cursor.read(1);
+    console.log('row.length:', row.length);
     while (row.length) {
       console.log('row[0].交易平台交易序號:', row[0].交易平台交易序號);
       const transaction_unique_id = row[0].交易平台交易序號;
-      await updateOrderStatus(transaction_unique_id);
+      await updateOrderStatus(transaction_unique_id, phase, client2);
       await new Promise(resolve => setTimeout(resolve, 1000)); // 原本設200，不確定可否，先改1000
       row = await cursor.read(1);
     }
     cursor.close(() => {
       console.log('cursor.close');
-      client.release()
+      client2.release()
     });
   } catch (error) {
     console.log(error);
+  }
+  finally {
+    client.release();
   }
   logger.log('info', { message: '===修改訂單狀態結束===', transaction_start, transaction_end });
 }
@@ -133,6 +145,7 @@ const updatePaymentStatus = async (transaction_unique_id) => {
   }
 }
 
+// todo 「訂單狀態function」有修正過cursor和client的關係，還有改用getCursorWOConnect，「付款狀態function」尚未修改
 const batchUpdatePaymentStatus = async (transaction_start, transaction_end) => {
   logger.log('info', { message: '===開始修改付款狀態===', transaction_start, transaction_end });
   try {
@@ -212,6 +225,7 @@ const updateDeliveryStatus = async (transaction_unique_id) => {
   }
 }
 
+// todo 「訂單狀態function」有修正過cursor和client的關係，還有改用getCursorWOConnect，「物流狀態function」尚未修改
 const batchUpdateDeliveryStatus = async (transaction_start, transaction_end) => {
   logger.log('info', { message: '===開始修改物流狀態===', transaction_start, transaction_end });
   try {

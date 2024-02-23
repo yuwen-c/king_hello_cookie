@@ -50,7 +50,7 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
   };
   try{
     loggerFire.log('info', { 交易平台交易序號: transaction_unique_id});
-    const response = await axios.post(createOrderUrl, requestData, { headers, timeout: 10000 })
+    const response = await axios.post(createOrderUrl, requestData, { headers, timeout: 30000 })
     console.log("response.data:", response.data.id); // 存id到db
     return response.data.id;
   }

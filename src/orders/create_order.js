@@ -110,7 +110,7 @@ const ordersETL = async (transaction_start, transaction_end, phase) => {
   finally {
     client.release()
     process.stdout.write('\u0007');
-    sendMail(transaction_start, transaction_end);
+    // sendMail(transaction_start, transaction_end, phase);
   }
 }
 

@@ -35,4 +35,18 @@ const logger = createLogger({
 // logger.log('info', '這是一條信息');
 // logger.log('error', '這是一條錯誤信息');
 
-module.exports = logger;
+const filterLogger = (error, details) => {
+  const { code, status } = error;
+  const { transaction_unique_id, message } = details;
+  if (code = 'ERR_BAD_REQUEST' && status === 422) {
+    logger.log('error', { message, 錯誤訊息: '422', 交易平台交易序號: details.transaction_unique_id });
+  }
+  else{
+    logger.log('error', { message, 錯誤訊息: error, 交易平台交易序號: details.transaction_unique_id });
+  }
+}
+
+module.exports = {
+  logger,
+  filterLogger
+};

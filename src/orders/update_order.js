@@ -1,8 +1,9 @@
 const axios = require('axios');
-const logger = require('../config/log');
+const { logger, filterLogger } = require('../config/log');
 const getOrderData = require('./get_order_data')
 const { getCursor, getCursorWOConnect } = require('./get_cursor')
 const { pool } = require('../config/pg');
+const sendMail = require('../config/mailer');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
@@ -51,7 +52,8 @@ const updateOrderStatus = async (transaction_unique_id, phase, client) => {
     }
   }
   catch(error) {
-    logger.log('error', { message: '更新訂單狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    // logger.log('error', { message: '更新訂單狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    filterLogger(error, { transaction_unique_id, message: '更新訂單狀態失敗'});
     console.log("error:", error);
   }
 }

@@ -64,8 +64,8 @@ const testCreateOrder = async (order) => {
 // 1. 建立訂單到shopline (後來改用下面的createOrders)
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
-// 2. 變更訂單狀態：目前還在第一階段(代入1)、自訂交易。USHOP都還沒。
-// batchUpdateOrderStatus('USHOP10002724', 'USHOP10002730', 1) // start(含), end「交易平台交易序號」: 
+// 2. 變更訂單狀態：
+batchUpdateOrderStatus('自訂交易10034970', '自訂交易10035182', 2) // start(含), end「交易平台交易序號」: 
 
 // 3. 變更付款狀態：目前還在第一階段(代入1)
 // batchUpdatePaymentStatus('USHOP10002724', 'USHOP10002730', 1)
@@ -86,8 +86,8 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   await ordersETL(transaction_start, transaction_end, phase);
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
-// 第一階段已全部打完，目前要創第二階段訂單，帶入phase=2
-// createOrders('自訂交易10034268', '自訂交易10034268', 2)
+// 根據第一、第二階段，帶入phase
+// createOrders('自訂交易10034387', '自訂交易10034388', 2)
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // phase=1 or 2;

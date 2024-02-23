@@ -64,13 +64,13 @@ const testCreateOrder = async (order) => {
 // 1. 建立訂單到shopline (後來改用下面的createOrders)
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
-// 2. 變更訂單狀態：
-batchUpdateOrderStatus('自訂交易10034970', '自訂交易10035182', 2) // start(含), end「交易平台交易序號」: 
+// 2. 變更訂單狀態：剩第一階段(代入1)
+// batchUpdateOrderStatus('自訂交易10034970', '自訂交易10035182', 1) // start(含), end「交易平台交易序號」: 
 
-// 3. 變更付款狀態：目前還在第一階段(代入1)
+// 3. 變更付款狀態：剩第一階段(代入1)
 // batchUpdatePaymentStatus('USHOP10002724', 'USHOP10002730', 1)
 
-// 4. 變更出貨狀態：目前還在第一階段(代入1)
+// 4. 變更出貨狀態：剩第一階段(代入1)
 // batchUpdateDeliveryStatus('USHOP10002724', 'USHOP10002730', 1)
 
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定

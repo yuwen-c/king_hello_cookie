@@ -141,7 +141,8 @@ const updatePaymentStatus = async (transaction_unique_id, phase, client) => {
     }
   }
   catch(error) {
-    logger.log('error', { message: '更新付款狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    // logger.log('error', { message: '更新付款狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    filterLogger(error, { transaction_unique_id, message: '更新付款狀態失敗'});
     console.log("error:", error);
   }
 }
@@ -231,7 +232,8 @@ const updateDeliveryStatus = async (transaction_unique_id, phase, client) => {
     }
   }
   catch(error) {
-    logger.log('error', { message: '更新物流狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    // logger.log('error', { message: '更新物流狀態失敗', 錯誤訊息: error, 交易平台交易序號: transaction_unique_id});
+    filterLogger(error, { transaction_unique_id, message: '更新物流狀態失敗'});
     console.log("error:", error);
   }
 }

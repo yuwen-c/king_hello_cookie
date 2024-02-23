@@ -84,6 +84,7 @@ const batchUpdateOrderStatus = async (transaction_start, transaction_end, phase)
     console.log(error);
   } finally {
     client.release();
+    sendMail(transaction_start, transaction_end, phase);
   }
   logger.log('info', { message: '===修改訂單狀態結束===', transaction_start, transaction_end });
 }
@@ -172,6 +173,7 @@ const batchUpdatePaymentStatus = async (transaction_start, transaction_end, phas
     console.log(error);
   } finally {
     client.release();
+    sendMail(transaction_start, transaction_end, phase);
   }
   logger.log('info', { message: '===修改付款狀態結束===', transaction_start, transaction_end });
 }
@@ -260,6 +262,7 @@ const batchUpdateDeliveryStatus = async (transaction_start, transaction_end, pha
     console.log(error);
   } finally {
     client.release();
+    sendMail(transaction_start, transaction_end, phase);
   }
   logger.log('info', { message: '===修改物流狀態結束===', transaction_start, transaction_end });
 }

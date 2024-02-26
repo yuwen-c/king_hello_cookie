@@ -1,5 +1,5 @@
 const { log } = require("winston");
-const logger = require('../config/log');
+const { logger } = require('../config/log');
 
 // 我有第一階段訂單，會使用orders_id_platform table和orders_malbic table
 // 還有第二階段訂單，會使用orders_id_platform_2 table和orders_malbic_2 table

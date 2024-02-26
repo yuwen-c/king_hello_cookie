@@ -8,7 +8,7 @@ const { pool } = require('./src/config/pg');
 const { ordersETL} = require('./src/orders/create_order')
 const getOrderData = require('./src/orders/get_order_data')
 const orderExample = require('./src/orders/order_example');
-const logger = require('./src/config/log');
+const { logger } = require('./src/config/log');
 const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus} = require('./src/orders/update_order');
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
@@ -71,7 +71,7 @@ const testCreateOrder = async (order) => {
 // batchUpdatePaymentStatus('USHOP10002724', 'USHOP10002730', 1)
 
 // 4. 變更出貨狀態：剩第一階段(代入1)
-// batchUpdateDeliveryStatus('USHOP10002724', 'USHOP10002730', 1)
+// batchUpdateDeliveryStatus('USHOP10032000', 'USHOP10034778', 1) 
 
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定
 // exportToExcel(); 
@@ -87,7 +87,7 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二階段，帶入phase
-// createOrders('自訂交易10034387', '自訂交易10034388', 2)
+createOrders('USHOP10037833', 'USHOP10037834', 2)
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // phase=1 or 2;

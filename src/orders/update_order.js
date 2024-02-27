@@ -283,11 +283,26 @@ const updateAllStatus = async(transaction_unique_id, phase) => {
 
 // updateAllStatus('自訂交易10007565', 'first')
 
+const batchUpdateAllStatus = async(transaction_start, transaction_end, phase) => {
+  if(!phase) {
+    console.log('需要指定階段');
+    return;
+  }
+  console.log('start batchUpdateAllStatus');
+  await batchUpdateOrderStatus(transaction_start, transaction_end, phase);
+  await batchUpdatePaymentStatus(transaction_start, transaction_end, phase);
+  await batchUpdateDeliveryStatus(transaction_start, transaction_end, phase);
+  console.log('end batchUpdateAllStatus');
+};
+
+batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')
+
 module.exports = {
   // updateOrderStatus,
   batchUpdateOrderStatus,
   // updatePaymentStatus,
   batchUpdatePaymentStatus,
   // updateDeliveryStatus,
-  batchUpdateDeliveryStatus
+  batchUpdateDeliveryStatus,
+  batchUpdateAllStatus
 }

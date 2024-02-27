@@ -88,7 +88,7 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-createOrders('USHOP10037840', 'USHOP10037841', 'third')
+// createOrders('USHOP10037840', 'USHOP10037841', 'third')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'

@@ -271,6 +271,18 @@ const batchUpdateDeliveryStatus = async (transaction_start, transaction_end, pha
   logger.log('info', { message: '===修改物流狀態結束===', transaction_start, transaction_end });
 }
 
+const updateAllStatus = async(transaction_unique_id, phase) => {
+  console.log('start updateAllStatus');
+  const client = await pool.connect();
+  await updateOrderStatus(transaction_unique_id, phase, client);
+  await updatePaymentStatus(transaction_unique_id, phase, client);
+  await updateDeliveryStatus(transaction_unique_id, phase, client);
+  client.release();
+  console.log('end updateAllStatus');
+}
+
+updateAllStatus('自訂交易10007487', 1)
+
 module.exports = {
   // updateOrderStatus,
   batchUpdateOrderStatus,

@@ -88,11 +88,13 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-// createOrders('USHOP10037840', 'USHOP10037841', 'third')
+// createOrders('USHOP10004577', 'USHOP10004578', 'first')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
 
-// createOrderLogger.log('info', { message: '===測試創建訂單的log===' });
-// updateOrderStatusLogger.log('info', { message: '===測試更新訂單狀態的log===' });
-// updatePaymentStatusLogger.log('info', { message: '===測試更新付款狀態的log===' });
+// 一次修改一筆訂單的三種狀態
+// updateAllStatus('USHOP10004577', 'first')
+
+// 一次修改整批訂單的三種狀態
+// batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')

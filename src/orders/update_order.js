@@ -279,9 +279,7 @@ const updateAllStatus = async(transaction_unique_id, phase) => {
   await updateDeliveryStatus(transaction_unique_id, phase, client);
   client.release();
   console.log('end updateAllStatus');
-}
-
-// updateAllStatus('自訂交易10007565', 'first')
+};
 
 const batchUpdateAllStatus = async(transaction_start, transaction_end, phase) => {
   if(!phase) {
@@ -295,8 +293,6 @@ const batchUpdateAllStatus = async(transaction_start, transaction_end, phase) =>
   console.log('end batchUpdateAllStatus');
 };
 
-batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')
-
 module.exports = {
   // updateOrderStatus,
   batchUpdateOrderStatus,
@@ -304,5 +300,6 @@ module.exports = {
   batchUpdatePaymentStatus,
   // updateDeliveryStatus,
   batchUpdateDeliveryStatus,
+  updateAllStatus,
   batchUpdateAllStatus
 }

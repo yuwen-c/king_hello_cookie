@@ -22,7 +22,8 @@ const getCursor = async(transaction_start, transaction_end) => {
 const getCursorWOConnect = async(transaction_start, transaction_end, client, phase) => {
   // const client = await pool.connect()
   // 判斷序號: >=start，>end
-  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ID_PLATFORM : ORDER_TABLE_MAPPING.SECOND_PHASE.ID_PLATFORM;
+  // const table = phase === 1 ? ORDER_TABLE_MAPPING.first.ID_PLATFORM : ORDER_TABLE_MAPPING.second.ID_PLATFORM;
+  const table = ORDER_TABLE_MAPPING[phase].ID_PLATFORM;
   const text = `
     SELECT * FROM ${table}
     WHERE 交易平台交易序號 >= $1 AND 交易平台交易序號 < $2

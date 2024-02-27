@@ -87,8 +87,8 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   await ordersETL(transaction_start, transaction_end, phase);
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
-// 根據第一、第二階段，帶入phase
-// createOrders('自訂交易10033697', '自訂交易10033698', 1)
+// 根據第一、第二階段，帶入phase: 'first', 'second', 'third'
+// createOrders('自訂交易10007565', '自訂交易10007566', 'first')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // phase=1 or 2;

@@ -281,7 +281,7 @@ const updateAllStatus = async(transaction_unique_id, phase) => {
   console.log('end updateAllStatus');
 }
 
-updateAllStatus('自訂交易10007487', 1)
+// updateAllStatus('自訂交易10007565', 'first')
 
 module.exports = {
   // updateOrderStatus,

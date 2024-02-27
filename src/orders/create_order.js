@@ -27,7 +27,8 @@ const writeOrderShoplineId = async (transaction_unique_id, shopline_id, client, 
     return;
   }
   try {
-    const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+    const table = ORDER_TABLE_MAPPING[phase].ORDERS;
+    // const table = phase === 1 ? ORDER_TABLE_MAPPING.first.ORDERS : ORDER_TABLE_MAPPING.second.ORDERS;
     const result = await client.query(`UPDATE ${table} SET shopline_id = $1 WHERE 交易平台交易序號 = $2`, [shopline_id, transaction_unique_id]);
     console.log('write shopline id success');
   } catch (error) {

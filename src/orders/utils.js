@@ -5,13 +5,17 @@ const { logger } = require('../config/log');
 // 還有第二階段訂單，會使用orders_id_platform_2 table和orders_malbic_2 table
 // 請幫我做一個mapping用的object:
 const ORDER_TABLE_MAPPING = {
-  FIRST_PHASE: {
+  first: {
     ID_PLATFORM: 'orders_id_platform',
     ORDERS: 'orders_malbic'
   },
-  SECOND_PHASE: {
+  second: {
     ID_PLATFORM: 'orders_id_platform_2',
     ORDERS: 'orders_malbic_2'
+  },
+  third: {
+    ID_PLATFORM: 'orders_id_platform_3',
+    ORDERS: 'orders_malbic_3'
   }
 }
 

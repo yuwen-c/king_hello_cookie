@@ -8,7 +8,8 @@ const getOrderData = async (transaction_unique_id, phase, client) => {
   }
   console.log("getOrderData transaction_unique_id:", transaction_unique_id);
   // const client = await pool.connect();
-  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+  const table = ORDER_TABLE_MAPPING[phase].ORDERS;
+  // const table = phase === 1 ? ORDER_TABLE_MAPPING.first.ORDERS : ORDER_TABLE_MAPPING.second.ORDERS;
   try {
     const result = await client.query(`SELECT * FROM ${table} WHERE 交易平台交易序號 = '${transaction_unique_id}'`);
     return result.rows;

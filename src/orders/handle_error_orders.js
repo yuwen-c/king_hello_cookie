@@ -8,7 +8,8 @@ const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
 
 const getErrorOrders = async (client, phase) => {
   console.log('getErrorOrders'); // ok
-  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+  // const table = phase === 1 ? ORDER_TABLE_MAPPING.first.ORDERS : ORDER_TABLE_MAPPING.second.ORDERS;
+  const table = ORDER_TABLE_MAPPING[phase].ORDERS;
   const query = `select distinct(交易平台交易序號) from ${table} om 
   where shopline_id is null and 交易平台 = 'USHOP'
   order by 交易平台交易序號 ASC;`;
@@ -64,7 +65,8 @@ const searchOrders = async (order_id) => {
 
 const writeOrderShoplineId = async (client, transaction_unique_id, shopline_id, phase) => {
   console.log('transaction_unique_id:', transaction_unique_id, 'shopline_id:', shopline_id);
-  const table = phase === 1 ? ORDER_TABLE_MAPPING.FIRST_PHASE.ORDERS : ORDER_TABLE_MAPPING.SECOND_PHASE.ORDERS;
+  const table = ORDER_TABLE_MAPPING[phase].ORDERS;
+  // const table = phase === 1 ? ORDER_TABLE_MAPPING.first.ORDERS : ORDER_TABLE_MAPPING.second.ORDERS;
   try {
     const result = await client.query(`UPDATE ${table} SET shopline_id = $1 WHERE 交易平台交易序號 = $2`, [shopline_id, transaction_unique_id]);
     console.log(`${transaction_unique_id} write shopline id success`);

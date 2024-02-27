@@ -8,7 +8,9 @@ const modifyOrder = (orderRows) => {
   let order = {};
   order.delivery_option_id = '65cd79a1092890002080690c'; // wavenet後台用：'65aa39988fc496001a9c8133';  // 後台新增：匯入訂單專用送貨方式
   order.payment_method_id = '65cd79db7538ef0011094d49'; // wavenet後台用：'65b0ad99ad226600204b904a';  // 後台新增：匯入訂單專用付款方式
-  order.customer_email = customer_email;  // 
+  // 有些訂單沒有會員帳號，所以要給一個假的email
+  order.customer_email = customer_email && customer_email !== '' ? customer_email : 'fakeUser@gmail.com'
+  console.log("customer_email:", customer_email, "order.customer_email:", order.customer_email);
   // 修正紅利點數
   const bonus = getBonus(oneRow);
   // const point = checkPoint(oneRow);
@@ -27,7 +29,7 @@ const modifyOrder = (orderRows) => {
 
   order.delivery_address = getDeliveryAddress(oneRow);
   order.order_remarks = getRemark(oneRow);
-  // console.log('order.total:', order.total, "order.subtotal:", order.subtotal);
+  console.log('modify order - ', 'order.total:', order.total, "order.subtotal:", order.subtotal);
   return order;
 }
 

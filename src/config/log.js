@@ -9,7 +9,7 @@ const myCustomTimezone = () => {
 };
 
 const logger = createLogger({
-  level: 'info',
+  level: 'info', // 只記錄info及以上等級的日誌，可以根據需要調整
   // format: winston.format.combine(
   //   winston.format.timestamp(), // 添加時間戳，但是不會有+8:00的時區
   //   winston.format.json()

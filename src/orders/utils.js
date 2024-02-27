@@ -110,20 +110,70 @@ const checkIfSubtotalIsFloat = (orderRow) => {
 }
 
 const getItems = (orderRows, bonus, point) => {
+  const { '交易金額': total, '運費': delivery_cost, '折扣總額': discount_total, '商品小計': items_subtotal, '交易平台':platform, '交易序號':transaction_id, '交易平台交易序號': transaction_unique_id } = orderRows[0];
   let items = [];
+  // orderRows.forEach((orderRow) => {
+  //   const { '商品編號': id, '商品資訊': name, '商品單價': price, '小計數量': quantity } = orderRow;
+  //   let item = {};
+  //   item.item_type = 'CustomProduct';
+  //   item.item_price = parseFloat(price);
+  //   item.item_data = {
+  //     name: id + '-' + name,
+  //     price: price.toString()
+  //   };
+  //   item.quantity = parseInt(quantity);
+  //   item.total = parseFloat(price) * parseInt(quantity);
+  //   items.push(item);
+  // });
+
+  // ========= 最後要匯入10幾筆小數點訂單 不確定bonus那邊的小數點會不會有問題？=========
+  // 1. 將商品單價四捨五入取整數
+  let adjustedItemSum = 0;
   orderRows.forEach((orderRow) => {
     const { '商品編號': id, '商品資訊': name, '商品單價': price, '小計數量': quantity } = orderRow;
     let item = {};
     item.item_type = 'CustomProduct';
     item.item_price = parseFloat(price);
+    const priceRoundToInt = Math.round(price);
+    adjustedItemSum += priceRoundToInt;
+    item.item_price = (priceRoundToInt);
     item.item_data = {
       name: id + '-' + name,
-      price: price.toString()
+      price: priceRoundToInt.toString()
     };
     item.quantity = parseInt(quantity);
-    item.total = parseFloat(price) * parseInt(quantity);
+    // item.total = parseFloat(price) * parseInt(quantity);
+    item.total = priceRoundToInt * parseInt(quantity);
     items.push(item);
   });
+
+  console.log('adjustedItemSum:', adjustedItemSum, typeof adjustedItemSum, 'items_subtotal:', items_subtotal);
+  // 2. 比對商品單價全部四捨五入後的「總和」，與商品小計(取到的是number，需要四捨五入)
+  // 3. 如果少了，就加一個diffItem商品，名稱為「差額」，價格為diff；如果多了，就要從剛剛push進去的最後一個商品中扣掉
+  const diff = Math.round(items_subtotal) - adjustedItemSum;
+  console.log('diff:', diff);
+  let diffItem = {};
+  if(diff > 0) {
+    diffItem.item_type = 'CustomProduct';
+    diffItem.item_price = diff;
+    diffItem.item_data = {
+      name: '差額',
+      price: diff.toString()
+    };
+    diffItem.quantity = 1;
+    diffItem.total = diff;
+    items.push(diffItem);
+  }
+  else if(diff < 0) {
+    // 從最後一個商品中扣掉
+    items[items.length-1].item_price += diff;
+    items[items.length-1].total += diff;
+  }
+  else {
+    console.log('商品小計與商品單價全部四捨五入後的「總和」相等');
+  }
+
+  // ========= 以上 ======== 調整四捨五入 最後要匯入10幾筆小數點訂單 =========
   /**
    * 調整四捨五入
    * 如果point >= 0.5，要增加一項商品，名稱為「調整四捨五入」，價格為point
@@ -144,7 +194,6 @@ const getItems = (orderRows, bonus, point) => {
   //   items.push(pointItem);
   // }
 
-  const { '交易金額': total, '運費': delivery_cost, '折扣總額': discount_total, '商品小計': items_subtotal, '交易平台':platform, '交易序號':transaction_id, '交易平台交易序號': transaction_unique_id } = orderRows[0];
   // 運費
   let deliveryItem = {};
   deliveryItem.item_type = 'CustomProduct';

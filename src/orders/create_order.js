@@ -62,6 +62,7 @@ const createOrderByAPI = async (order, transaction_unique_id) => {
       錯誤訊息: error, 
       // keys: error.response?.data ? Object.keys(error.response.data) : [] 
     });
+    console.log('error', error.response.data)
     await new Promise(resolve => setTimeout(resolve, 1*60*1000)); // 如果有失敗就睡2min 
   }
   finally {

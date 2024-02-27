@@ -1,9 +1,6 @@
 const { log } = require("winston");
 const { logger } = require('../config/log');
 
-// 我有第一階段訂單，會使用orders_id_platform table和orders_malbic table
-// 還有第二階段訂單，會使用orders_id_platform_2 table和orders_malbic_2 table
-// 請幫我做一個mapping用的object:
 const ORDER_TABLE_MAPPING = {
   first: {
     ID_PLATFORM: 'orders_id_platform',
@@ -116,6 +113,7 @@ const checkIfSubtotalIsFloat = (orderRow) => {
 const getItems = (orderRows, bonus, point) => {
   const { '交易金額': total, '運費': delivery_cost, '折扣總額': discount_total, '商品小計': items_subtotal, '交易平台':platform, '交易序號':transaction_id, '交易平台交易序號': transaction_unique_id } = orderRows[0];
   let items = [];
+  // ====== 原來版本的 ======
   // orderRows.forEach((orderRow) => {
   //   const { '商品編號': id, '商品資訊': name, '商品單價': price, '小計數量': quantity } = orderRow;
   //   let item = {};
@@ -146,12 +144,11 @@ const getItems = (orderRows, bonus, point) => {
       price: priceRoundToInt.toString()
     };
     item.quantity = parseInt(quantity);
-    // item.total = parseFloat(price) * parseInt(quantity);
     item.total = priceRoundToInt * parseInt(quantity);
     items.push(item);
   });
 
-  console.log('adjustedItemSum:', adjustedItemSum, typeof adjustedItemSum, 'items_subtotal:', items_subtotal);
+  console.log('adjustedItemSum:', adjustedItemSum, 'items_subtotal:', items_subtotal);
   // 2. 比對商品單價全部四捨五入後的「總和」，與商品小計(取到的是number，需要四捨五入)
   // 3. 如果少了，就加一個diffItem商品，名稱為「差額」，價格為diff；如果多了，就要從剛剛push進去的最後一個商品中扣掉
   const diff = Math.round(items_subtotal) - adjustedItemSum;
@@ -178,25 +175,6 @@ const getItems = (orderRows, bonus, point) => {
   }
 
   // ========= 以上 ======== 調整四捨五入 最後要匯入10幾筆小數點訂單 =========
-  /**
-   * 調整四捨五入
-   * 如果point >= 0.5，要增加一項商品，名稱為「調整四捨五入」，價格為point
-   * 如果point < 0.5，要在折扣的地方，加上point
-   */
-  // console.log("point", point, typeof point)
-  // if(point >= 0.5) {
-  //   let pointItem = {};
-  //   pointItem.item_type = 'CustomProduct';
-  //   pointItem.item_price = parseFloat(point);
-  //   pointItem.item_data = {
-  //     name: '調整四捨五入',
-  //     price: point.toString()
-  //   };
-  //   pointItem.quantity = 1;
-  //   pointItem.total = parseFloat(point);
-  //   console.log("pointItem:", pointItem)
-  //   items.push(pointItem);
-  // }
 
   // 運費
   let deliveryItem = {};
@@ -210,43 +188,15 @@ const getItems = (orderRows, bonus, point) => {
   deliveryItem.total = parseInt(delivery_cost);
   items.push(deliveryItem);
 
-  // // fix 小數點：如果subtotal - 折扣總額 !== total，要調整折扣
-  // let calculate_subtotal = parseFloat(items_subtotal) + parseFloat(delivery_cost) - 
-  // let calculate_total = parseInt(total);
-  // if(calculate_subtotal - parseInt(discount_total) !== calculate_total) {
-  //   discount_total = calculate_subtotal - calculate_total;
-  // }
-
   // 折扣
   let discountItem = {};
-  // if(point===0) {
-    discountItem.item_type = 'CustomDiscount';
-    discountItem.item_price = parseInt(discount_total) + parseInt(bonus);
-    discountItem.item_data = {
-      name: '折扣及紅利點數'
-    };
-    discountItem.total = parseInt(discount_total) + parseInt(bonus);
-  // }
-  // else if (point < 0.5) {
-  //   discountItem.item_type = 'CustomDiscount';
-  //   discountItem.item_price = parseInt(discount_total) + parseInt(bonus) + parseFloat(point);
-  //   discountItem.item_data = {
-  //     name: '折扣、紅利點數及四捨五入調整'
-  //   };
-  //   discountItem.total = parseInt(discount_total) + parseInt(bonus) + parseFloat(point);
-  // }
+  discountItem.item_type = 'CustomDiscount';
+  discountItem.item_price = parseInt(discount_total) + parseInt(bonus);
+  discountItem.item_data = {
+    name: '折扣及紅利點數'
+  };
+  discountItem.total = parseInt(discount_total) + parseInt(bonus);
   items.push(discountItem);
-
-  // 紅利點數
-  // CustomDiscount items can't more then 1
-  // let bonusItem = {};
-  // bonusItem.item_type = 'CustomDiscount';
-  // bonusItem.item_price = parseInt(bonus);
-  // bonusItem.item_data = {
-  //   name: '紅利點數'
-  // };
-  // bonusItem.total = parseInt(bonus);
-  // items.push(bonusItem);
 
   // 訂單編號
   let infoItem = {};

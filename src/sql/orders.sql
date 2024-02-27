@@ -67,10 +67,10 @@
 */
 
 
--- 擷取縣市寫到收件者縣市欄位 ok
+-- 擷取縣市寫到收件者縣市欄位 ok 3ok
 -- 但發現有很多內含「南投門市、東門市場」的地址，多加一個判斷
 -- 還不確定沒有地址的會怎樣 todo
-UPDATE orders_malbic_2
+UPDATE orders_malbic_3
 SET 收件者縣市 = 
   CASE
     WHEN POSITION('縣' IN 收件者地址) > 0 
@@ -85,10 +85,14 @@ SET 收件者縣市 =
   END
 WHERE POSITION('縣' IN 收件者地址) > 0 OR POSITION('市' IN 收件者地址) > 0;
 
--- 處理「巿」異體字 (音：福) ok(0 row)
-UPDATE orders_malbic_2
+-- 處理「巿」異體字 (音：福) ok(0 row) ok3(0 row)
+UPDATE orders_malbic_3
 SET 收件者地址 = REPLACE(收件者地址, '巿', '市')
 WHERE 收件者地址 LIKE '%巿%';
+
+-- 縣市的地方需要手動檢查抓到的縣市是否正確：
+-- 肉眼看有沒有錯誤的縣市，手動修改
+select distinct(收件者縣市) from orders_malbic_3;
 
 -- 在查為什麼有的地址縣市更新無效：結果對方打的是「巿」
 -- SELECT 
@@ -100,24 +104,24 @@ WHERE 收件者地址 LIKE '%巿%';
 --         ELSE '不包含縣或市'
 --     END AS 是否包含縣市
 -- FROM 
---     orders_malbic_2
+--     orders_malbic_3
 -- WHERE 
 --     交易平台交易序號 = '自訂交易10003206' or 交易平台交易序號 = '自訂交易10003845';
 
 -- 把兩個欄位組合，當成判斷訂單的唯一值
--- ALTER TABLE orders_malbic_2
+-- ALTER TABLE orders_malbic_3
 -- ADD COLUMN 交易平台交易序號 VARCHAR(255);
 
--- 加入交易平台交易序號 ok (90228 rows)
-UPDATE orders_malbic_2
+-- 加入交易平台交易序號 ok (90228 rows) ok3(1343 row)
+UPDATE orders_malbic_3
 SET 交易平台交易序號 = 交易平台 || 交易序號;
 
 -- 將所有不同的(distinct)交易序號挑出來，插入到 orders_transaction_id 表格中 ok (3377 rows)
-insert into orders_id_platform_2 ("交易平台交易序號")
-select distinct 交易平台交易序號 from orders_malbic_2;
+insert into orders_id_platform_3 ("交易平台交易序號")
+select distinct 交易平台交易序號 from orders_malbic_3;
 
 -- 處理收件者手機，0被去掉的問題，限定2023年的訂單 -- 新訂單無此問題
-UPDATE orders_malbic_2
+UPDATE orders_malbic_3
 SET "收件者手機" = 
    CASE 
        WHEN "收件者手機無0" IS NULL  AND "建立時間" LIKE '2023%' THEN ''
@@ -128,20 +132,20 @@ WHERE "建立時間" LIKE '2023%';
 
 -- 商品小計、商品單價 有小數點，只能手動處理。 (要注意建立時間在2023上半年) -- 新訂單只有一筆：自訂交易10035019
 SELECT DISTINCT ON (交易平台交易序號) 交易平台交易序號, 商品小計, 交易金額, 折扣總額, 運費, 商品單價, 建立時間 
-FROM orders_malbic_2 
+FROM orders_malbic_3 
 WHERE 商品單價 LIKE '%.%' OR 商品小計 LIKE '%.%';
 
 -- 發現有8079筆交易(商品)的收件者姓名''，出貨類型'尚未選擇' -- 新訂單無此問題
 -- 因為沒有收件者姓名無法匯入shopline，所以將這些交易從orders_id_platform刪除
--- 保留交易在orders_malbic_2，只有從交易平台交易序號的地方刪掉
+-- 保留交易在orders_malbic_3，只有從交易平台交易序號的地方刪掉
 -- 總共刪除16筆，用distinct(交易平台交易序號)看只有16筆
-select count(*) from orders_malbic_2 om 
+select count(*) from orders_malbic_3 om 
 where 收件者姓名='' and 出貨類型 = '尚未選擇';
 
-DELETE FROM orders_id_platform_2
+DELETE FROM orders_id_platform_3
 WHERE 交易平台交易序號 IN (
     SELECT distinct(交易平台交易序號) 
-    FROM orders_malbic_2 
+    FROM orders_malbic_3 
     WHERE 收件者姓名 = '' AND 出貨類型 = '尚未選擇'
 );
 

@@ -19,14 +19,6 @@ const modifyOrder = (orderRows) => {
   order.total = parseInt(total); // *付款總金額,為訂單小計扣除購物金與折扣 // 付款總金額,包含附加費與運費 扣除discount 1000 = 1100 - 100
   order.items = getItems(orderRowsWithoutDuplicates, bonus); // fix: 新增紅利點數的折扣進去
 
-  // 修正小數點：
-  /**
-   * 1. subtotal = 商品小計(1位小數點)+運費
-   * 2. discount(寫在商品裡面) = 折扣總額+紅利點數，但是紅利點數要用算的
-   * 3. total = 交易總額
-   */
-  // order.subtotal = parseFloat(items_subtotal) + parseFloat(delivery_cost);
-
   order.delivery_address = getDeliveryAddress(oneRow);
   order.order_remarks = getRemark(oneRow);
   console.log('modify order - ', 'order.total:', order.total, "order.subtotal:", order.subtotal);

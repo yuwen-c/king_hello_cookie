@@ -65,13 +65,13 @@ const testCreateOrder = async (order) => {
 // 1. 建立訂單到shopline (後來改用下面的createOrders)
 // ordersETL('USHOP10002994', 'USHOP10002995') // start, end「交易平台交易序號」: 開頭分 USHOP 和 自訂交易
 
-// 2. 變更訂單狀態：
+// 2. 變更訂單狀態：根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
 // batchUpdateOrderStatus('USHOP10036961', 'USHOP10036962', 2) // start(含), end「交易平台交易序號」: 
 
-// 3. 變更付款狀態：
+// 3. 變更付款狀態：根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
 // batchUpdatePaymentStatus('自訂交易10003000', '自訂交易10003001', 1)
 
-// 4. 變更出貨狀態：
+// 4. 變更出貨狀態：根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
 // batchUpdateDeliveryStatus('USHOP10025625', 'USHOP10025626', 1)
 
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定
@@ -87,11 +87,11 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   await ordersETL(transaction_start, transaction_end, phase);
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
-// 根據第一、第二階段，帶入phase: 'first', 'second', 'third'
-// createOrders('自訂交易10007565', '自訂交易10007566', 'first')
+// 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
+createOrders('USHOP10037840', 'USHOP10037841', 'third')
 
 // 5. 處理錯誤訂單
-// handleErrorOrders(1) // phase=1 or 2;
+// handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
 
 // createOrderLogger.log('info', { message: '===測試創建訂單的log===' });
 // updateOrderStatusLogger.log('info', { message: '===測試更新訂單狀態的log===' });

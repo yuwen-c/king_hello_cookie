@@ -14,6 +14,8 @@ const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliverySta
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
 const handleErrorOrders = require('./src/orders/handle_error_orders');
+const { getDifference, updateCredits, updatePoints } = require('./src/customers/update_customer');
+const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_USER_AGENT = process.env.SHOPLINE_USER_AGENT;
@@ -88,7 +90,7 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-// createOrders('USHOP10004577', 'USHOP10004578', 'first')
+// createOrders('USHOP10034511', 'USHOP10034512', 'new')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
@@ -98,3 +100,5 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 
 // 一次修改整批訂單的三種狀態
 // batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')
+
+

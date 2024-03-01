@@ -7,6 +7,8 @@ const logFileMapping = {
   UPDATE_ORDER_STATUS: 'update_order_status.log',
   UPDATE_PAYMENT_STATUS: 'update_payment_status.log',
   UPDATE_DELIVERY_STATUS: 'update_delivery_status.log',
+  UPDATE_CUSTOMER: 'update_customer.log',
+  DELETE_CUSTOMER: 'delete_customer.log'
 }
 
 // 使用 'Asia/Taipei' 时区
@@ -33,11 +35,15 @@ const createLoggerWithDynamicPath = (filename) => {
 const createOrderLogger = createLoggerWithDynamicPath(logFileMapping.CREATE_ORDER);
 const updateOrderStatusLogger = createLoggerWithDynamicPath(logFileMapping.UPDATE_ORDER_STATUS);
 const updatePaymentStatusLogger = createLoggerWithDynamicPath(logFileMapping.UPDATE_PAYMENT_STATUS);
+const updateCustomerLogger = createLoggerWithDynamicPath(logFileMapping.UPDATE_CUSTOMER);
+const deleteCustomerLogger = createLoggerWithDynamicPath(logFileMapping.DELETE_CUSTOMER);
 
 module.exports = {
   createOrderLogger,
   updateOrderStatusLogger,
-  updatePaymentStatusLogger
+  updatePaymentStatusLogger,
+  updateCustomerLogger,
+  deleteCustomerLogger
 };
 
 

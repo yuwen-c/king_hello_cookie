@@ -16,6 +16,7 @@ const exportToExcel = require('./src/customers/export_excel');
 const handleErrorOrders = require('./src/orders/handle_error_orders');
 const { getDifference, updateCredits, updatePoints } = require('./src/customers/update_customer');
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
+const cancelOrder = require('./src/orders/cancel_order');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_USER_AGENT = process.env.SHOPLINE_USER_AGENT;

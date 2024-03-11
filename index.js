@@ -91,7 +91,7 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-createOrders('USHOP10037823', 'USHOP10037963', 'forth')
+// createOrders('自訂交易10035150', '自訂交易10035391', 'fourth')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
@@ -100,7 +100,7 @@ createOrders('USHOP10037823', 'USHOP10037963', 'forth')
 // updateAllStatus('USHOP10004577', 'first')
 
 // 一次修改整批訂單的三種狀態
-// batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')
+// batchUpdateAllStatus('自訂交易10035150', '自訂交易10035391', 'fourth')
 
 
 // 更新客戶紅利點數

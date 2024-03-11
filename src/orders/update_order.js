@@ -286,11 +286,13 @@ const batchUpdateAllStatus = async(transaction_start, transaction_end, phase) =>
     console.log('需要指定階段');
     return;
   }
+  logger.log('info', { message: '===開始修改 三種 狀態===', transaction_start, transaction_end });
   console.log('start batchUpdateAllStatus');
   await batchUpdateOrderStatus(transaction_start, transaction_end, phase);
   await batchUpdatePaymentStatus(transaction_start, transaction_end, phase);
   await batchUpdateDeliveryStatus(transaction_start, transaction_end, phase);
   console.log('end batchUpdateAllStatus');
+  logger.log('info', { message: '===修改 三種 狀態結束===', transaction_start, transaction_end });
 };
 
 module.exports = {

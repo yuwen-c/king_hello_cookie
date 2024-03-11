@@ -1,6 +1,6 @@
 -- 相關tables:
 -- 1. 從shopline匯出已匯入的客戶資料： shopline_export_customers，已匯入資料(現有購物金、現有點數)
--- 2. 將要從莫比克匯出的最終版客戶資料： customers_mailbic_mandarin_all，已開table，還沒匯入(購物金、紅利點數)
+-- 2. 將要從莫比克匯出的最終版~20240307客戶資料： customers_mailbic_mandarin_all，已匯入(購物金、紅利點數)
 -- 3. 將兩邊有紅利點數、購物金的客戶資料，取聯集：customers_point_union，欄位？
 
 CREATE TABLE customers_point_union (
@@ -13,7 +13,7 @@ CREATE TABLE customers_point_union (
     莫比克紅利點數 INT
 );
 
--- cmma table目前還是空的！
+
 -- INSERT INTO customers_point_union (顧客id, 全名, 電郵, 現有購物金, 現有點數, 莫比克購物金, 莫比克紅利點數)
 -- SELECT 
 --     sec."顧客ID" as 顧客id, 
@@ -43,14 +43,14 @@ SELECT
     cmm.購物金 as 莫比克購物金, 
     cmm.紅利點數 as 莫比克紅利點數
 FROM 
-    customers_mailbic_mandarin cmm
+    customers_mailbic_mandarin_all cmm
 JOIN 
     shopline_export_customers sec ON cmm.會員帳號 = sec.電郵
 WHERE 
     cmm.購物金 != 0 OR cmm.紅利點數 != 0 OR sec.現有購物金 != 0 OR sec.現有點數 != 0;
 
 -- 改用left join
--- 我将JOIN改为了LEFT JOIN，这意味着customers_mailbic_mandarin表中的所有行都会被包括在结果中，
+-- 我将JOIN改为了LEFT JOIN，这意味着customers_mailbic_mandarin_all表中的所有行都会被包括在结果中，
 -- 并且如果shopline_export_customers表中没有匹配的行，那么对应的列会用NULL填充。
 INSERT INTO customers_point_union (顧客id, 全名, 電郵, 現有購物金, 現有點數, 莫比克購物金, 莫比克紅利點數)
 SELECT 
@@ -62,12 +62,13 @@ SELECT
     cmm.購物金 as 莫比克購物金, 
     cmm.紅利點數 as 莫比克紅利點數
 FROM 
-    customers_mailbic_mandarin cmm
+    customers_mailbic_mandarin_all cmm
 LEFT JOIN 
     shopline_export_customers sec ON cmm.會員帳號 = sec.電郵
 WHERE 
     cmm.購物金 != 0 OR cmm.紅利點數 != 0 OR sec.現有購物金 != 0 OR sec.現有點數 != 0;
 
+-- FULL JOIN，最終使用的版本。比數有核對過，正確。
 -- FULL JOIN...3890 rows
 -- 改用LOWER -> 3887 rows
 INSERT INTO customers_point_union (顧客id, 全名, 電郵, 現有購物金, 現有點數, 莫比克購物金, 莫比克紅利點數)
@@ -80,7 +81,7 @@ SELECT
     cmm.購物金 as 莫比克購物金, 
     cmm.紅利點數 as 莫比克紅利點數
 FROM 
-    customers_mailbic_mandarin cmm
+    customers_mailbic_mandarin_all cmm
 FULL JOIN 
     shopline_export_customers sec ON LOWER(cmm.會員帳號) = LOWER(sec.電郵)
 WHERE 
@@ -91,4 +92,4 @@ WHERE
 - 確定寫進去的筆數，看起來是合理的了，
 - query看看有沒有null的欄位，還真的有！
 - 資料看起來，是email有大寫的問題，shopline會存成小寫
-- `cmm.會員帳號 = sec.電郵` → 這邊應該可以加個轉換？
+- `cmm.會員帳號 = sec.電郵` → 這邊應該可以加個轉換？ok

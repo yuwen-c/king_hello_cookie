@@ -14,7 +14,7 @@ const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliverySta
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
 const handleErrorOrders = require('./src/orders/handle_error_orders');
-const { getDifference, updateCredits, updatePoints } = require('./src/customers/update_customer');
+const { getCustomerDataAndUpdateShopline } = require('./src/customers/update_customer');
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 const cancelOrder = require('./src/orders/cancel_order');
 
@@ -103,3 +103,5 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // batchUpdateAllStatus('USHOP10037839', 'USHOP10037871', 'third')
 
 
+// 更新客戶紅利點數
+getCustomerDataAndUpdateShopline('65cdbc2bf1e7ac0001821964')

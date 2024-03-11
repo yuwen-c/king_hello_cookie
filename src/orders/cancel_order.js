@@ -29,8 +29,7 @@ const  cancelOrder = async (id) => {
     // cancelOrderLogger.log('error', { message: 'cancel order error', 錯誤訊息: error, 訂單序號: id });
   }
 }
-console.log('cancel order')
-cancelOrder('65e587a71e6b9c001d511c04');
+// cancelOrder('65e587a71e6b9c001d511c04');
 
 module.exports = cancelOrder;
 

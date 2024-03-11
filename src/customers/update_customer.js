@@ -13,6 +13,7 @@ const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 // 紅利點數: 在mailbic 最新的客戶紅利點數 (要更新成這個值)
 // shopline_id 、shopline_store_credits (商店購物金)、shopline_member_points (會員點數)
 
+// abandoned: 已經從shopline匯出的顧客表中取得id，不需要打此API
 const getCustomerIdFromShoplineByEmail = async (email) => {
   const url = 'https://open.shopline.io/v1/customers/search';
   const params = {
@@ -44,6 +45,7 @@ const getCustomerIdFromShoplineByEmail = async (email) => {
   }
 };
 
+// abandoned
 const writeCustomerDataToDB = async (customer) => {
   const client = await pool.connect();
   const { email, id: shopline_id, member_point_balance: shopline_member_points, credit_balance: shopline_store_credits } = customer;
@@ -61,11 +63,11 @@ const writeCustomerDataToDB = async (customer) => {
   }
 };
 
-// todo: 等新增了customers_mailbic_all table，再修改query的table name
+// abandoned: 改為從同一個table取得diff，不需要用兩個table來比較。不再使用此function。
 const getDifference = async (email) => {
   const client = await pool.connect();
-  // const table = 'customers_mailbic_mandarin_all';
-  const table = 'customers_mailbic_mandarin'
+  const table = 'customers_mailbic_mandarin_all';
+  // const table = 'customers_mailbic_mandarin'
   try {
     const result = await client.query(`SELECT * FROM ${table} WHERE email = $1`, [email]);
     console.log('result:', result.rows);
@@ -89,6 +91,7 @@ const getDifference = async (email) => {
   }
 };
 
+// abandoned: 確定RD不需要協助更新購物金(因為會觸發通知客戶)
 // yuwen.chiu@wavenet.com.tw id: 65a651d69bd1ad0001f8403a
 // 現有後台購物金：10; 現有後台紅利點數：0
 // 修改：購物金+100; 紅利點數+200
@@ -113,8 +116,8 @@ const updateCredits = async (id, creditDiff) => {
 };
 
 // 會員點數 = 紅利點數 = member_points
-// POST https://open.shopline.io/v1/customers/:id/member_points
-const updatePoints = async (id, pointDiff) => {
+// 打shopline API: POST https://open.shopline.io/v1/customers/:id/member_points
+const updateShoplinePoints = async (id, pointDiff) => {
   const URL = `https://open.shopline.io/v1/customers/${id}/member_points`;
   const headers = {
     'Accept': 'application/json',
@@ -123,21 +126,53 @@ const updatePoints = async (id, pointDiff) => {
   };
   const requestData = {
     value: pointDiff,
-    remarks: "搬站" // todo
+    remarks: "舊站點數"
   };
   try {
     const response = await axios.post(URL, requestData, { headers });
     console.log(response.data);
   } catch (error) {
     console.log(error);
-    updateCustomerLogger.log('error', { message: 'update 紅利點數失敗', 錯誤訊息: error, shopline_id: id, pointDiff });
+    const errorData = error.response.data;
+    updateCustomerLogger.log('error', { message: 'update 紅利點數失敗', 錯誤訊息: error, shopline_id: id, pointDiff, errorData });
   }
 };
 
-
-
+// 新作法：從「聯集」得到的table，得到客戶的id、紅利點數(新舊站)，計算diff，有不一樣 -> 發api更新
+// 因為沒有遞增的id，只有文字的id，要怎麼query batch? 
+// todo 修改batch作法
+const getCustomerDataAndUpdateShopline = async (customer_id) => {
+  const client = await pool.connect();
+  const table = 'customers_point_union';
+  try {
+    const result = await client.query(`SELECT * FROM ${table} WHERE 顧客id = $1`, [customer_id]);
+    console.log(result.rows);
+    if(result.rows && result.rows.length === 0) {
+      console.log('查無此人');
+      return;
+    } 
+    else if(result.rows && result.rows.length === 1) {
+      const { 顧客id: shopline_id, 現有點數:shopline_member_points, 莫比克紅利點數: mailbic_points, 現有購物金: shopline_store_credits, 莫比克購物金: mailbic_credits } = result.rows[0];
+      console.log(shopline_id, shopline_member_points, mailbic_points, shopline_store_credits, mailbic_credits);
+      const pointDiff = mailbic_points - shopline_member_points;
+      console.log(shopline_id, pointDiff);
+      updateShoplinePoints(shopline_id, pointDiff);
+    }
+    else {
+      console.log('有多筆customer共用相同email');
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    client.release();
+  }
+}
 
 /**
+ * max: 65ee715ada632e0001d66e27
+ * min: 65cdbc2bf1e7ac0001821964
+ * -> 發現一筆id null。尚未建立。需要重抓max, min
+ * 
  * 
  * 修改要注意：todo
  * 做計算，如果有某一種diff，就打某一個api。如果diff = 0就不打。
@@ -157,10 +192,11 @@ const updatePoints = async (id, pointDiff) => {
  */
 
 module.exports = {
-  getCustomerIdFromShoplineByEmail,
-  getDifference,
-  updateCredits,
-  updatePoints,
+  // getCustomerIdFromShoplineByEmail,
+  // getDifference,
+  // updateCredits,
+  getCustomerDataAndUpdateShopline,
+  updateShoplinePoints
 }
 
 // getCustomerIdFromShoplineByEmail('zxctop104@yahoo.com.tw');

@@ -125,8 +125,11 @@ const updateShoplinePoints = async (id, pointDiff) => {
     'Content-Type': 'application/json'
   };
   const requestData = {
+    id,
     value: pointDiff,
-    remarks: "舊站點數"
+    remarks: "舊站點數",
+    email_target: 1, // 1=NOT_SEND全部不送
+    sms_notification_target: 1 // 1=NOT_SEND全部不送
   };
   try {
     const response = await axios.post(URL, requestData, { headers });

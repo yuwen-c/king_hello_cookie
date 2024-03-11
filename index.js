@@ -91,7 +91,7 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
   logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
 }
 // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-// createOrders('USHOP10034511', 'USHOP10034512', 'new')
+createOrders('USHOP10037823', 'USHOP10037963', 'forth')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
@@ -104,4 +104,8 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 
 
 // 更新客戶紅利點數
-getCustomerDataAndUpdateShopline('65cdbc2bf1e7ac0001821964')
+// getCustomerDataAndUpdateShopline('65cdbc2cdf019a000144cc9c')
+
+// x心怡: 65cdbc2bf1e7ac0001821964
+// 鄭愷鈴: 65cdbc2cd94bdc0001b316d9
+// 楊熟敏：65cdbc2cdf019a000144cc9c

@@ -13,6 +13,10 @@ const ORDER_TABLE_MAPPING = {
   third: {
     ID_PLATFORM: 'orders_id_platform_3',
     ORDERS: 'orders_malbic_3'
+  },
+  fourth: {
+    ID_PLATFORM: 'orders_id_platform_4',
+    ORDERS: 'orders_malbic_4'
   }
 }
 

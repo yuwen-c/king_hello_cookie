@@ -14,7 +14,7 @@ const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliverySta
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
 const handleErrorOrders = require('./src/orders/handle_error_orders');
-const { getCustomerDataAndUpdateShopline, getCustomerIdByCursor } = require('./src/customers/update_customer');
+const { getCustomerDataAndUpdateShopline, getCustomerIdAndUpdateShoplinePointsAndTable, getCustomerShoplinePointsBalance } = require('./src/customers/update_customer');
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 const cancelOrder = require('./src/orders/cancel_order');
 
@@ -112,4 +112,4 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // 詹宥霖：65d46cd4d94bdc0001cf125b ok 相符 已更新db
 // 土銀：65cdbc2ddf019a000144ccc3 ok 相符 已更新db
 
-getCustomerIdByCursor();
+getCustomerIdAndUpdateShoplinePointsAndTable();

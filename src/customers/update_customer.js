@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { pool } = require('../config/pg');
-// const Cursor = require('pg-cursor')
+const Cursor = require('pg-cursor')
 const { updateCustomerLogger } = require('../config/log_dynamic_path');
 
 const SHOPLINE_API_TOKEN_KING = process.env.SHOPLINE_API_TOKEN_KING;
@@ -115,17 +115,35 @@ const updateCredits = async (id, creditDiff) => {
   }
 };
 
+// 寫入欄位，用來判斷是否已經更新過shopline的紅利點數
+const writeStatusToDb = async (id, status) => {
+  console.log('id:', id, 'status:', status);
+  const client = await pool.connect();
+  const query = `UPDATE customers_point_union SET 紅利點數更新狀態 = $1 WHERE 顧客id = $2`;
+  const values = [status, id];
+  try {
+    const result = await client.query(query, values);
+    console.log("更新db成功");
+  } catch (error) {
+    console.log("更新db失敗error:", error);
+  } finally {
+    client.release();
+  }
+};
+
+
+// shopline後台必須打開紅利點數開關，並存檔，否則打此API會收到error
 // 會員點數 = 紅利點數 = member_points
 // 打shopline API: POST https://open.shopline.io/v1/customers/:id/member_points
-const updateShoplinePoints = async (id, pointDiff) => {
+const updateShoplinePoints = async (id, pointDiff, mailbic_points) => {
   const URL = `https://open.shopline.io/v1/customers/${id}/member_points`;
   const headers = {
     'Accept': 'application/json',
-    'Authorization': `Bearer ${SHOPLINE_API_TOKEN}`,
+    // 'Authorization': `Bearer ${SHOPLINE_API_TOKEN}`, // 測試商店
+    'Authorization': `Bearer ${SHOPLINE_API_TOKEN_KING}`,
     'Content-Type': 'application/json'
   };
   const requestData = {
-    id,
     value: pointDiff,
     remarks: "舊站點數",
     email_target: 1, // 1=NOT_SEND全部不送
@@ -134,16 +152,27 @@ const updateShoplinePoints = async (id, pointDiff) => {
   try {
     const response = await axios.post(URL, requestData, { headers });
     console.log(response.data);
+    const { point_balance } = response.data;
+    if(point_balance === mailbic_points) {
+      console.log('ＯＯＯ比對紅利點數相符ＯＯＯ')
+      updateCustomerLogger.log('info', { message: 'update 紅利點數成功', 顧客shopline的id: id, pointDiff });
+      await writeStatusToDb(id, 'success');
+    }
+    else {
+      console.log('ＸＸＸ紅利點數不相符ＸＸＸ')
+      updateCustomerLogger.log('error', { message: 'update 紅利點數成功，但餘額有誤', 顧客shopline的id: id, pointDiff, shopline記錄到的紅利點數: point_balance, 莫比克拿到的紅利點數: mailbic_points });
+      await writeStatusToDb(id, 'wrong');
+    }
   } catch (error) {
     console.log(error);
     const errorData = error.response.data;
-    updateCustomerLogger.log('error', { message: 'update 紅利點數失敗', 錯誤訊息: error, shopline_id: id, pointDiff, errorData });
+    updateCustomerLogger.log('error', { message: 'update 紅利點數失敗', 錯誤訊息: error, 顧客shopline的id: id, pointDiff, 取出的錯誤訊息: errorData }); 
+    await writeStatusToDb(id, 'fail');
   }
 };
 
 // 新作法：從「聯集」得到的table，得到客戶的id、紅利點數(新舊站)，計算diff，有不一樣 -> 發api更新
 // 因為沒有遞增的id，只有文字的id，要怎麼query batch? 
-// todo 修改batch作法
 const getCustomerDataAndUpdateShopline = async (customer_id) => {
   const client = await pool.connect();
   const table = 'customers_point_union';
@@ -159,7 +188,7 @@ const getCustomerDataAndUpdateShopline = async (customer_id) => {
       console.log(shopline_id, shopline_member_points, mailbic_points, shopline_store_credits, mailbic_credits);
       const pointDiff = mailbic_points - shopline_member_points;
       console.log(shopline_id, pointDiff);
-      updateShoplinePoints(shopline_id, pointDiff);
+      updateShoplinePoints(shopline_id, pointDiff, mailbic_points);
     }
     else {
       console.log('有多筆customer共用相同email');
@@ -167,6 +196,32 @@ const getCustomerDataAndUpdateShopline = async (customer_id) => {
   } catch (error) {
     console.log(error);
   } finally {
+    client.release();
+  }
+}
+
+const getCustomerIdByCursor = async () => {
+  updateCustomerLogger.log('info', { message: '===開始更新紅利點數==='}); 
+  const client = await pool.connect();
+  try{
+    const cursor = client.query(new Cursor(
+      `select 顧客id from customers_point_union cpu
+      where 紅利點數更新狀態 is null and 顧客id is not null 
+      and 顧客id < '65cdbc30df019a000144cd5f'
+      order by 顧客id asc;`
+    ));
+    let rows = [];
+    rows = await cursor.read(1);
+    while (rows.length) {
+      console.log('顧客id:', rows[0].顧客id);
+      await getCustomerDataAndUpdateShopline(rows[0].顧客id);
+      rows = await cursor.read(1);
+    }
+    cursor.close(()=> console.log('cursor close'));
+  } catch (error) {
+    console.log(error);
+  }
+  finally {
     client.release();
   }
 }
@@ -199,7 +254,8 @@ module.exports = {
   // getDifference,
   // updateCredits,
   getCustomerDataAndUpdateShopline,
-  updateShoplinePoints
+  updateShoplinePoints,
+  getCustomerIdByCursor
 }
 
 // getCustomerIdFromShoplineByEmail('zxctop104@yahoo.com.tw');

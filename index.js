@@ -10,11 +10,11 @@ const getOrderData = require('./src/orders/get_order_data')
 const orderExample = require('./src/orders/order_example');
 const { logger } = require('./src/config/log');
 const { createOrderLogger, updateOrderStatusLogger, updatePaymentStatusLogger } = require('./src/config/log_dynamic_path');
-const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus} = require('./src/orders/update_order');
+const { batchUpdateOrderStatus, batchUpdatePaymentStatus, batchUpdateDeliveryStatus, batchUpdateAllStatus} = require('./src/orders/update_order');
 const exportDataToCSV = require('./src/customers/export_csv');
 const exportToExcel = require('./src/customers/export_excel');
 const handleErrorOrders = require('./src/orders/handle_error_orders');
-const { getCustomerDataAndUpdateShopline } = require('./src/customers/update_customer');
+const { getCustomerDataAndUpdateShopline, getCustomerIdByCursor } = require('./src/customers/update_customer');
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 const cancelOrder = require('./src/orders/cancel_order');
 
@@ -104,8 +104,12 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 
 
 // 更新客戶紅利點數
-// getCustomerDataAndUpdateShopline('65cdbc2cdf019a000144cc9c')
+// getCustomerDataAndUpdateShopline('')
 
-// x心怡: 65cdbc2bf1e7ac0001821964
-// 鄭愷鈴: 65cdbc2cd94bdc0001b316d9
-// 楊熟敏：65cdbc2cdf019a000144cc9c
+// x心怡: 65cdbc2bf1e7ac0001821964 ok 與db相符 已更新db
+// 鄭愷鈴: 65cdbc2cd94bdc0001b316d9 ok 相符 已更新db
+// 楊熟敏：65cdbc2cdf019a000144cc9c ok 相符 已更新db
+// 詹宥霖：65d46cd4d94bdc0001cf125b ok 相符 已更新db
+// 土銀：65cdbc2ddf019a000144ccc3 ok 相符 已更新db
+
+getCustomerIdByCursor();

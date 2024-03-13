@@ -17,6 +17,7 @@ const handleErrorOrders = require('./src/orders/handle_error_orders');
 const { getCustomerDataAndUpdateShopline, getCustomerIdAndUpdateShoplinePointsAndTable, getCustomerShoplinePointsBalance } = require('./src/customers/update_customer');
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 const cancelOrder = require('./src/orders/cancel_order');
+const { checkPoints } = require('./src/customers/check_points');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_USER_AGENT = process.env.SHOPLINE_USER_AGENT;
@@ -112,4 +113,6 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // 詹宥霖：65d46cd4d94bdc0001cf125b ok 相符 已更新db
 // 土銀：65cdbc2ddf019a000144ccc3 ok 相符 已更新db
 
-getCustomerIdAndUpdateShoplinePointsAndTable();
+// getCustomerIdAndUpdateShoplinePointsAndTable();
+
+checkPoints();

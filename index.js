@@ -103,16 +103,8 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // 一次修改整批訂單的三種狀態
 // batchUpdateAllStatus('自訂交易10035150', '自訂交易10035391', 'fourth')
 
-
 // 更新客戶紅利點數
-// getCustomerDataAndUpdateShopline('')
-
-// x心怡: 65cdbc2bf1e7ac0001821964 ok 與db相符 已更新db
-// 鄭愷鈴: 65cdbc2cd94bdc0001b316d9 ok 相符 已更新db
-// 楊熟敏：65cdbc2cdf019a000144cc9c ok 相符 已更新db
-// 詹宥霖：65d46cd4d94bdc0001cf125b ok 相符 已更新db
-// 土銀：65cdbc2ddf019a000144ccc3 ok 相符 已更新db
-
 // getCustomerIdAndUpdateShoplinePointsAndTable();
 
-checkPoints();
+// 檢查shopline點數是否正確
+// checkPoints();

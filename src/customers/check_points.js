@@ -60,8 +60,10 @@ const comparePoints = async (id, shopline_points, mailbic_points) => {
 
 const checkPoints = async () => {
   const client = await pool.connect();
+  // todo: 依照要跑單筆或多筆，修改where條件
   const query = `
     SELECT 顧客id FROM customers_point_union
+    where 顧客id = '65cdc922d94bdc0001b3bdd0';
   `;
   try {
     const res = await client.query(query);

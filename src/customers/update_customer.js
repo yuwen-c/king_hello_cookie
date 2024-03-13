@@ -228,11 +228,14 @@ const getCustomerIdAndUpdateShoplinePointsAndTable = async () => {
   updateCustomerLogger.log('info', { message: '===開始更新紅利點數==='}); 
   const client = await pool.connect();
   try{
+    // todo: 測試階段有加顧客id限制，正式打要拿掉
     const cursor = client.query(new Cursor(
-      `select 顧客id from customers_point_union cpu
+      `
+      select 顧客id from customers_point_union cpu
       where 紅利點數更新狀態 is null and 顧客id is not null 
-      and 顧客id < '65cdc8d2f1e7ac000182bd4b'
-      order by 顧客id asc;`
+      and 顧客id < '65cdc922d94bdc0001b3bdd0'
+      order by 顧客id asc;
+      `
     ));
     let rows = [];
     rows = await cursor.read(1);

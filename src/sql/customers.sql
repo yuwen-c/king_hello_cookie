@@ -13,7 +13,7 @@
 -- );
 
 -- shopline 顧客table
--- CREATE TABLE customers_shopline_3 (
+-- CREATE TABLE customers_shopline_4 (
 --     full_name VARCHAR(100), -- 姓名
 --     email_address VARCHAR(255), -- email
 --     country_calling_code VARCHAR(20), -- 國際電話區碼 886
@@ -50,8 +50,22 @@
 --     original_address VARCHAR(255)
 -- );
 
--- 初步顧客資料格式轉換，先把地址塞在original_address裡面，還沒拆 ok*2*3
-INSERT INTO customers_shopline_3 (
+
+-- todo: 會員級別的標籤要改，不要用「'舊站-會員級別-'」
+-- vip->0325vip
+-- vvip->0325vvip
+
+-- 「新增的客戶，先不要寫入會員等級，」
+-- 「之後從全部客戶名單中，挑出特殊級別客戶，用新的方式寫入」
+-- 試打api，看到底是新增進去，還是可以把舊的刪掉？
+-- 有兩隻API，一個是update客戶，一個是update tag。範例沒有明顯說是不是可以刪除
+
+
+-- 初步顧客資料格式轉換，先把地址塞在original_address裡面，還沒拆 ok*2*3*4
+-- 原本標籤會寫會員級別：
+-- 因為後來要重打標籤API，所以拿掉：CONCAT('舊站-會員級別-', customers_mailbic_mandarin_4.會員等級, ',') AS tags, -- 所有要加的tag前面都要加上「舊站-」
+
+INSERT INTO customers_shopline_4 (
     full_name,
     email_address,
     country_calling_code,
@@ -72,22 +86,22 @@ SELECT
     電話,
     CASE WHEN 生日 = '' THEN NULL ELSE TO_DATE(生日, 'YYYY-MM-DD') END,
     'Y', -- 寫為會員
-    CONCAT('舊站-會員級別-', customers_mailbic_mandarin_3.會員等級, ',') AS tags, -- 所有要加的tag前面都要加上「舊站-」
-    case when 會員備註 = '' then null else CONCAT('舊站-會員備註-', customers_mailbic_mandarin_3.會員備註, ',') end,
+    null, -- 會員等級 先拿掉
+    case when 會員備註 = '' then null else CONCAT('舊站-會員備註-', customers_mailbic_mandarin_4.會員備註, ',') end,
     null,  -- 交易總金額應該直接寫null
     NULLIF(紅利點數, 0), -- 使用 NULLIF 將為 0 的值轉為 NULL
     NULLIF(購物金, 0),   
     地址
-FROM customers_mailbic_mandarin_3;
+FROM customers_mailbic_mandarin_4;
 
 
--- 把original_address有門市的刪 ok*2*3
-UPDATE customers_shopline_3
+-- 把original_address有門市的刪 ok*2*3*4
+UPDATE customers_shopline_4
 SET original_address = ''
 WHERE original_address LIKE '%門市%';
 
--- 先判斷縣，再判斷市，如果都沒有就留空 ok*2*3
-UPDATE customers_shopline_3
+-- 先判斷縣，再判斷市，如果都沒有就留空 ok*2*3*4
+UPDATE customers_shopline_4
 SET address_city = 
   CASE
     WHEN POSITION('縣' IN original_address) > 0 
@@ -101,15 +115,15 @@ SET address_city =
 WHERE POSITION('縣' IN original_address) > 0 OR POSITION('市' IN original_address) > 0;
 
 -- 手動去query出distinct address_city，看看有沒有錯誤的縣市
--- 有的話手動下query修改 ok*2*3
+-- 有的話手動下query修改 ok*2*3*4
 
--- 把 > 2011的生日改成null ok*2*3
-update customers_shopline_3
+-- 把 > 2011的生日改成null ok*2*3*4
+update customers_shopline_4
 set birthday = null
 WHERE birthday >= DATE '2011-01-01';
 
--- 把電話寫到備註，接在原本的備註後面。之後再把有問題的電話刪除。ok*2*3
-update customers_shopline_3
+-- 把電話寫到備註，接在原本的備註後面。之後再把有問題的電話刪除。ok*2*3*4
+update customers_shopline_4
 set note =
 case 
 	when (note is not null and note !='') then concat(note, '舊站電話-', mobile_number, '。')
@@ -117,24 +131,24 @@ case
 end
 where mobile_number is not null and mobile_number !='';
 
--- 電話移除'-'，包含手機、非手機都移除 ok*2*3
-UPDATE customers_shopline_3
+-- 電話移除'-'，包含手機、非手機都移除 ok*2*3*4
+UPDATE customers_shopline_4
 SET mobile_number = REPLACE(mobile_number, '-', '')
 WHERE mobile_number LIKE '%-%';
 
--- 把不是手機的刪除 ok*2*3
-update customers_shopline_3
+-- 把不是手機的刪除 ok*2*3*4
+update customers_shopline_4
 set mobile_number = null 
 where length(mobile_number) != 10 or mobile_number not like '09%';
 
--- 把空電話的886刪除 ok*2*3
-update customers_shopline_3
+-- 把空電話的886刪除 ok*2*3*4
+update customers_shopline_4
 set country_calling_code = null 
 where mobile_number is null;
 
 
--- 如果address_city有值，再去寫收件人欄位。address_1會把縣市刪除。把沒有mobile_number的挑掉，不要寫入收件人。ok 第三批
-UPDATE customers_shopline_3
+-- 如果address_city有值，再去寫收件人欄位。address_1會把縣市刪除。把沒有mobile_number的挑掉，不要寫入收件人。ok 第三批 ok*4
+UPDATE customers_shopline_4
 SET address_recipient_name = full_name,
     address_country_calling_code_of_recipient_phone_number = '886',
     address_recipient_phone_number = mobile_number,
@@ -144,22 +158,22 @@ WHERE address_city IS NOT NULL and mobile_number IS NOT NULL;
 
 -- 檢查mobile_number有沒有重複 (不確定資料大時跑是否ok)
 SELECT mobile_number
-FROM customers_shopline_3
+FROM customers_shopline_4
 GROUP BY mobile_number
 HAVING COUNT(*) > 1;
 
 -- 把重複的電話刪除，只留下email比較小的-----不然如果有重複的電話，會兩筆都無法匯入shopline ok*2*3
-UPDATE customers_shopline_3 AS c
+UPDATE customers_shopline_4 AS c
 SET mobile_number = NULL
 WHERE EXISTS (
    SELECT 1
-   FROM customers_shopline_3 AS c2
+   FROM customers_shopline_4 AS c2
    WHERE c2.mobile_number = c.mobile_number
    AND c2.email_address < c.email_address
 );
 
--- 之後要再跑一次，清除886 --- ok*2*3
-update customers_shopline_3 
+-- 之後要再跑一次，清除886 --- ok*2*3*4
+update customers_shopline_4 
 set country_calling_code = null 
 where mobile_number is null;
 

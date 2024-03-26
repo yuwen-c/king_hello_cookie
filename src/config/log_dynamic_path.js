@@ -9,7 +9,8 @@ const logFileMapping = {
   UPDATE_DELIVERY_STATUS: 'update_delivery_status.log',
   UPDATE_CUSTOMER: 'update_customer.log',
   DELETE_CUSTOMER: 'delete_customer.log',
-  CANCEL_ORDER: 'cancel_order.log'
+  CANCEL_ORDER: 'cancel_order.log',
+  UPDATE_CUSTOMER_TAGS: 'update_customer_tags.log'
 }
 
 // 使用 'Asia/Taipei' 时区
@@ -49,6 +50,7 @@ const updatePaymentStatusLogger = createLoggerWithDynamicPath(logFileMapping.UPD
 const updateCustomerLogger = createLoggerWithDynamicPath(logFileMapping.UPDATE_CUSTOMER);
 const deleteCustomerLogger = createLoggerWithDynamicPath(logFileMapping.DELETE_CUSTOMER);
 const cancelOrderLogger = createLoggerWithDynamicPath(logFileMapping.CANCEL_ORDER);
+const updateCustomerTagsLogger = createLoggerWithDynamicPath(logFileMapping.UPDATE_CUSTOMER_TAGS);
 
 module.exports = {
   createOrderLogger,
@@ -56,7 +58,8 @@ module.exports = {
   updatePaymentStatusLogger,
   updateCustomerLogger,
   deleteCustomerLogger,
-  cancelOrderLogger
+  cancelOrderLogger,
+  updateCustomerTagsLogger
 };
 
 

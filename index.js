@@ -18,6 +18,7 @@ const { getCustomerDataAndUpdateShopline, getCustomerIdAndUpdateShoplinePointsAn
 const { deleteWavenetCustomerBatch } = require('./src/customers/delete_user');
 const cancelOrder = require('./src/orders/cancel_order');
 const { checkPoints } = require('./src/customers/check_points');
+const { updateTags } = require('./src/customers/update_tags');
 
 const SHOPLINE_API_TOKEN = process.env.SHOPLINE_API_TOKEN;
 const SHOPLINE_USER_AGENT = process.env.SHOPLINE_USER_AGENT;
@@ -27,7 +28,7 @@ const testShopline = async () => {
   try {
     const response = await axios.get('https://open.shopline.io/v1/products', {
       params: {
-        per_page: 20,
+        per_page: 5,
         page: 1
       },
       headers: {
@@ -79,7 +80,7 @@ const testCreateOrder = async (order) => {
 // batchUpdateDeliveryStatus('USHOP10025625', 'USHOP10025626', 1)
 
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定
-// exportToExcel(); 
+exportToExcel(); 
 
 // 1. 創建訂單+log
 const createOrders = async (transaction_start, transaction_end, phase) => {
@@ -108,3 +109,8 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 
 // 檢查shopline點數是否正確
 // checkPoints();
+
+// 修改客戶tags
+// bill 65efafb0199d200028040235
+// 國王你好 65f416390ec5c8000a7fc593
+// updateTags('65f416390ec5c8000a7fc593', ['0325-vip-test'])

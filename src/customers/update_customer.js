@@ -138,7 +138,7 @@ const getCustomerShoplinePointsBalance = async (id) => {
 const writeStatusToDb = async (id, status) => {
   console.log('準備寫入資料庫id:', id, 'status:', status);
   const client = await pool.connect();
-  const query = `UPDATE customers_point_union SET 紅利點數更新狀態 = $1 WHERE 顧客id = $2`;
+  const query = `UPDATE customers_point_union_2 SET 紅利點數更新狀態 = $1 WHERE 顧客id = $2`;
   const values = [status, id];
   try {
     const result = await client.query(query, values);
@@ -151,7 +151,7 @@ const writeStatusToDb = async (id, status) => {
 };
 
 
-// shopline後台必須打開紅利點數開關，並存檔，否則打此API會收到error
+// shopline後台必須打開紅利點數開關，並「存檔」，否則打此API會收到error
 // 會員點數 = 紅利點數 = member_points
 // 打shopline API: POST https://open.shopline.io/v1/customers/:id/member_points
 const updateShoplinePoints = async (id, pointDiff, mailbic_points) => {
@@ -199,7 +199,7 @@ const updateShoplinePoints = async (id, pointDiff, mailbic_points) => {
 const getCustomerDataAndUpdateShopline = async (customer_id, latest_shopline_member_points) => {
   console.log('customer_id:', customer_id, 'latest_shopline_member_points:', latest_shopline_member_points);
   const client = await pool.connect();
-  const table = 'customers_point_union';
+  const table = 'customers_point_union_2';
   try {
     const result = await client.query(`SELECT * FROM ${table} WHERE 顧客id = $1`, [customer_id]);
     console.log('從table取得特定id顧客如下：', result.rows);
@@ -231,7 +231,7 @@ const getCustomerIdAndUpdateShoplinePointsAndTable = async () => {
     // todo: 測試階段有加顧客id限制，正式打要拿掉
     const cursor = client.query(new Cursor(
       `
-      select 顧客id from customers_point_union cpu
+      select 顧客id from customers_point_union_2 cpu
       where 紅利點數更新狀態 is null and 顧客id is not null 
       and 顧客id < '65cdc922d94bdc0001b3bdd0'
       order by 顧客id asc;
@@ -266,6 +266,12 @@ const getCustomerIdAndUpdateShoplinePointsAndTable = async () => {
 }
 
 /**
+ * 第二次：
+ * max: 66024b508ecf4e00014d9909
+ * min: 65cdbc2bf1e7ac0001821964
+ * 沒有null id
+ * 
+ * 第一次：
  * max: 65ee715ada632e0001d66e27
  * min: 65cdbc2bf1e7ac0001821964
  * -> 發現一筆id null。尚未建立。需要重抓max, min
@@ -276,7 +282,7 @@ const getCustomerIdAndUpdateShoplinePointsAndTable = async () => {
  ** 不可以重複打，要研究回傳訊息，還有寫log**
  ** 因為不能重複打，應該還是用傳id進去的方式比較好指定**
  *
- * 以下以用sql解決：
+ * 以下已用sql解決：
  * * 已經有`shopline_export_customers` table，及`customers_mailbic_mandarin_all` table
  * * 要建一個`customers_with_member_points` table，欄位要再挑
  * 1. 從shopline table「現有紅利點數」 !== 0的客戶，寫入`customers_with_member_points` table

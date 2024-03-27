@@ -240,17 +240,20 @@ const getCustomerIdAndUpdateShoplinePointsAndTable = async () => {
     let rows = [];
     rows = await cursor.read(1);
     while (rows.length) {
-      console.log('顧客id:', rows[0].顧客id);
-      const latest_shopline_member_points = await getCustomerShoplinePointsBalance(rows[0].顧客id);
+      const customer_id = rows[0].顧客id;
+      console.log('顧客id:', customer_id);
+      const latest_shopline_member_points = await getCustomerShoplinePointsBalance(customer_id);
       console.log('取得目前shopline的點數為:', latest_shopline_member_points);
-      const { shopline_id, pointDiff, mailbic_points } = await getCustomerDataAndUpdateShopline(rows[0].顧客id, latest_shopline_member_points);
+      const { shopline_id, pointDiff, mailbic_points } = await getCustomerDataAndUpdateShopline(customer_id, latest_shopline_member_points);
       if(pointDiff !== 0) {
         const {id, status} = await updateShoplinePoints(shopline_id, pointDiff, mailbic_points);
+        console.log('updateShoplinePoints-回傳id:', id, 'status:', status)
         await writeStatusToDb(id, status);
         console.log('等待2秒');
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       else{
+        await writeStatusToDb(shopline_id, 'no_diff');
         console.log('shopline紅利點數 不需要修改');
       }
       rows = await cursor.read(1);

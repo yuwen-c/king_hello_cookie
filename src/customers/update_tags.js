@@ -66,11 +66,9 @@ const updateTagsWithShoplineAPI = async (customer_id, level) => {
 const updateCustomerTags = async () => {
   updateCustomerTagsLogger.log('info', { message: '===開始更新會員等級==='}); 
   const client = await pool.connect();
-  try{ // todo: 先打前面1000筆
+  try{
     const query = `select 顧客id, 會員等級 from customers_tag_union 
-    where 標籤更新狀態 is null
-    and 顧客id < '65cddbde330f360001a4d117'
-    ;`;
+    where 標籤更新狀態 is null;`;
     const cursor = client.query(new Cursor(query));
     let row = [];
     row = await cursor.read(1);

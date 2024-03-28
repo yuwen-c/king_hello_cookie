@@ -28,7 +28,7 @@ const getCustomerShoplinePointsBalance = async (id) => {
 const getDBPoints = async (id) => {
   console.log('getDBPoints id:', id);
   const client = await pool.connect();
-  const query = `SELECT 莫比克紅利點數 FROM customers_point_union WHERE 顧客id = $1`;
+  const query = `SELECT 莫比克紅利點數 FROM customers_point_union_2 WHERE 顧客id = $1`;
   const values = [id];
   try {
     const res = await client.query(query, values);
@@ -46,7 +46,7 @@ const comparePoints = async (id, shopline_points, mailbic_points) => {
   // 如果兩個points相等，寫入資料庫欄位點數核對為true
   // 如果不相等，寫入資料庫欄位點數核對為false
   const client = await pool.connect();
-  const query = `UPDATE customers_point_union SET 點數核對 = $1 WHERE 顧客id = $2`;
+  const query = `UPDATE customers_point_union_2 SET 點數核對 = $1 WHERE 顧客id = $2`;
   const values = [shopline_points === mailbic_points, id];
   try {
     const res = await client.query(query, values);
@@ -60,10 +60,9 @@ const comparePoints = async (id, shopline_points, mailbic_points) => {
 
 const checkPoints = async () => {
   const client = await pool.connect();
-  // todo: 依照要跑單筆或多筆，修改where條件
+  // todo: 依照要跑單筆或多筆，修改where條件:     where 顧客id = '65cdc922d94bdc0001b3bdd0'
   const query = `
-    SELECT 顧客id FROM customers_point_union
-    where 顧客id = '65cdc922d94bdc0001b3bdd0';
+    SELECT 顧客id FROM customers_point_union_2 where 點數核對 is null ;
   `;
   try {
     const res = await client.query(query);

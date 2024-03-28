@@ -5,7 +5,7 @@ const path = require('path');
 const csv = require('csv-parser');
 // const client = require('./src/config/pg');
 const { pool } = require('./src/config/pg');
-const { ordersETL} = require('./src/orders/create_order')
+const { createOrders } = require('./src/orders/create_order')
 const getOrderData = require('./src/orders/get_order_data')
 const orderExample = require('./src/orders/order_example');
 const { logger } = require('./src/config/log');
@@ -82,18 +82,8 @@ const testCreateOrder = async (order) => {
 // 產生顧客檔案，匯出範圍在export_excel.js裡面設定
 // exportToExcel(); 
 
-// 1. 創建訂單+log
-const createOrders = async (transaction_start, transaction_end, phase) => {
-  if(!phase) {
-    console.log('需要指定第一階段或第二階段');
-    return;
-  }
-  logger.log('info', { message: '===開始創訂單===', transaction_start, transaction_end });
-  await ordersETL(transaction_start, transaction_end, phase);
-  logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
-}
-// 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
-// createOrders('自訂交易10035150', '自訂交易10035391', 'fourth')
+// 1. 創建訂單+log。根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
+createOrders('USHOP10037965', 'USHOP10037970', 'fifth')
 
 // 5. 處理錯誤訂單
 // handleErrorOrders(1) // 根據第一、第二、第三階段，帶入phase: 'first', 'second', 'third'
@@ -114,4 +104,4 @@ const createOrders = async (transaction_start, transaction_end, phase) => {
 // bill 65efafb0199d200028040235
 // 國王你好 65f416390ec5c8000a7fc593
 // updateTagsWithShoplineAPI('65f416390ec5c8000a7fc593', 'VIP')
-updateCustomerTags();
+// updateCustomerTags();

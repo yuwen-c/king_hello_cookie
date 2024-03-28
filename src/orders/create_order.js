@@ -116,7 +116,18 @@ const ordersETL = async (transaction_start, transaction_end, phase) => {
   }
 }
 
+const createOrders = async (transaction_start, transaction_end, phase) => {
+  if(!phase) {
+    console.log('需要指定第一階段或第二階段');
+    return;
+  }
+  logger.log('info', { message: '===開始創訂單===', transaction_start, transaction_end });
+  await ordersETL(transaction_start, transaction_end, phase);
+  logger.log('info', { message: '===創訂單結束===', transaction_start, transaction_end });
+}
+
 module.exports = {
   // getOrderTransactionId,
-  ordersETL,
+  // ordersETL,
+  createOrders
 };
